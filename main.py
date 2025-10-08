@@ -119,14 +119,33 @@ async def save_stats(stats):
     }
     if sha:
         payload["sha"] = sha
+
     async with aiohttp.ClientSession() as session:
         async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
-            if resp.status not in (200, 201):
-                text = await resp.text()
-                print(f"Failed to save stats to GitHub: {resp.status} - {text}")
+            text = await resp.text()  # Always read as text first
+
+            if resp.status in (200, 201):
+                try:
+                    response = json.loads(text)
+                    stats['_sha'] = response['content']['sha']
+                    print("✅ Stats saved successfully.")
+                except Exception as e:
+                    print(f"⚠️ Could not parse GitHub response: {e}\nResponse text:\n{text}")
             else:
-                response = await resp.json()
-                stats['_sha'] = response['content']['sha']
+                print(f"❌ Failed to save stats to GitHub ({resp.status}): {text}")
+
+                # Handle SHA mismatch (422)
+                if resp.status == 422 and sha:
+                    print("⚙️ Retrying save without SHA...")
+                    payload.pop("sha", None)
+                    async with session.put(url, headers=GITHUB_HEADERS, json=payload) as retry:
+                        retry_text = await retry.text()
+                        if retry.status in (200, 201):
+                            response = json.loads(retry_text)
+                            stats['_sha'] = response['content']['sha']
+                            print("✅ Retry succeeded.")
+                        else:
+                            print(f"❌ Retry failed ({retry.status}): {retry_text}")
 
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
@@ -255,5 +274,6 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
