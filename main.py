@@ -95,6 +95,7 @@ async def load_stats():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=GITHUB_HEADERS) as resp:
+            print(f"GitHub status: {resp.status}")  # Add this
             if resp.status == 200:
                 data = await resp.json()
                 content = base64.b64decode(data['content']).decode()
@@ -107,6 +108,7 @@ async def load_stats():
                 text = await resp.text()
                 print(f"Failed to load stats from GitHub: {resp.status} - {text}")
                 return {"total_rolls": 0, "leaderboard": []}
+    
 
 async def save_stats(stats):
     sha = stats.pop('_sha', None)
@@ -253,4 +255,5 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
