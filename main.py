@@ -6,6 +6,10 @@ import asyncio
 from datetime import datetime
 from flask import Flask
 import threading
+from datetime import datetime, timedelta
+
+cooldowns = {}
+COOLDOWN_TIME = timedelta(seconds=2)
 
 app = Flask('')
 
@@ -166,6 +170,18 @@ async def on_message(message):
     if not message.content.startswith("!rng.goof"):
         return
 
+    now = datetime.utcnow()
+    last_roll = cooldowns.get(message.author.id)
+
+    if last_roll and now - last_roll < COOLDOWN_TIME:
+        remaining = COOLDOWN_TIME - (now - last_roll)
+        await message.channel.send(
+            f"⏳ Slow down, {message.author.mention}! Try again in {remaining.total_seconds():.1f}s."
+        )
+        return
+
+    cooldowns[message.author.id] = now
+
     # --- Leaderboard Command ---
     if message.content.strip() == "!rng.goof leaderboard":
         async with file_lock:
@@ -241,5 +257,6 @@ if not token:
 if __name__ == "__main__":
     keep_alive()
     client.run(token)
+
 
 
