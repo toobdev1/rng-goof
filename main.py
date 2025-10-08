@@ -93,27 +93,36 @@ modifiers = {
 # --- GITHUB STATS FUNCTIONS ---
 async def load_stats():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
+    print(f"Fetching from GitHub: {url}")
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=GITHUB_HEADERS) as resp:
-            print(f"GitHub status: {resp.status}")
             text = await resp.text()
-            print(f"GitHub response (first 300 chars):\n{text[:300]}")
-
-            if resp.status == 200:
-                try:
-                    data = json.loads(text)
-                    content = base64.b64decode(data['content']).decode()
-                    stats = json.loads(content)
-                    stats.setdefault('total_rolls', 0)
-                    stats.setdefault('leaderboard', [])
-                    stats['_sha'] = data['sha']
-                    return stats
-                except Exception as e:
-                    print(f"JSON parse error: {e}")
-                    return {"total_rolls": 0, "leaderboard": []}
-            else:
-                print(f"Failed to load stats ({resp.status})")
+            print(f"🔹 GitHub status: {resp.status}")
+            print(f"🔹 GitHub response (first 500 chars):\n{text[:500]}")
+            try:
+                data = json.loads(text)
+            except Exception as e:
+                print(f"Could not decode GitHub JSON: {e}")
                 return {"total_rolls": 0, "leaderboard": []}
+
+            # If GitHub returned an error object
+            if "message" in data and "content" not in data:
+                print(f"GitHub API error: {data['message']}")
+                return {"total_rolls": 0, "leaderboard": []}
+
+            # If success, decode stats.json content
+            try:
+                content = base64.b64decode(data["content"]).decode()
+                stats = json.loads(content)
+            except Exception as e:
+                print(f"❌ Could not decode stats.json content: {e}")
+                return {"total_rolls": 0, "leaderboard": []}
+
+            stats.setdefault("total_rolls", 0)
+            stats.setdefault("leaderboard", [])
+            stats["_sha"] = data.get("sha", None)
+            print("Stats loaded successfully.")
+            return stats
 
 async def save_stats(stats):
     sha = stats.pop('_sha', None)
@@ -266,3 +275,4 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
