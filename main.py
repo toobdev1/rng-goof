@@ -1,0 +1,242 @@
+import discord
+import random
+import os
+import json
+import asyncio
+from datetime import datetime
+from flask import Flask
+import threading
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "RNG GOOF bot is alive!"
+
+def run_web():
+    app.run(host='0.0.0.0', port=8080)
+
+def keep_alive():
+    t = threading.Thread(target=run_web)
+    t.start()
+
+random.seed()
+
+STATS_FILE = 'all_rolls_2.json'
+file_lock = asyncio.Lock()  # concurrency protection
+
+
+def load_stats():
+    """Load roll statistics from file."""
+    try:
+        with open(STATS_FILE, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {'total_rolls': 0, 'leaderboard': []}
+
+
+def save_stats(stats):
+    """Save roll statistics to file atomically."""
+    temp_file = STATS_FILE + '.tmp'
+    with open(temp_file, 'w') as f:
+        json.dump(stats, f, indent=2)
+    os.replace(temp_file, STATS_FILE)
+
+
+def update_leaderboard(stats, roll_data):
+    """Update leaderboard with new roll if it makes top 10."""
+    leaderboard = stats.get('leaderboard', [])
+    leaderboard.append(roll_data)
+    leaderboard.sort(key=lambda x: x['rarity'], reverse=True)
+
+    rank = None
+    for i, roll in enumerate(leaderboard[:10], 1):
+        if roll == roll_data:
+            rank = i
+            break
+
+    stats['leaderboard'] = leaderboard[:10]
+    return rank
+
+
+# --- RARITIES AND MODIFIERS ---
+
+rarities = {
+    "Malicious": (67108864, "<:malicious:1425109134793244673>"),
+    "Immeasurable": (33554432, "<:immeasurable:1425109138329047282>"),
+    "Aleph-Null": (16777216, "<:alephnull:1425110355511742565>"),
+    "Omega": (8388608, "<:omega:1425109141264793692>"),
+    "Unimaginable": (4194304, "<:unimaginable:1425109144494673981>"),
+    "TARTARUS": (2097152, "<:tartarus:1425109147111919636>"),
+    "HELL": (1048576, "<:hell:1425109149724966932>"),
+    "DEATH": (524288, "<:death:1425109153294057615>"),
+    "No": (262144, "<:no:1425109156096114738>"),
+    "WHY": (131072, "<:why:1425109160114262036>"),
+    "Literal": (65536, "<:literal:1425109162664263850>"),
+    "eRRoR": (32768, "<:error:1416246007506665552>"),
+    "nil": (16384, "<:nil:1399358997990998038>"),
+    "Unreal": (8192, "<:unreal:1399359000922816542>"),
+    "Horrific": (4096, "<:horrific:1399359003309637662>"),
+    "Catastrophic": (2048, "<:catastrophic:1399359005679419492>"),
+    "Terrifying": (1024, "<:terrifying:1399359007352684596>"),
+    "Extreme": (512, "<:extreme:1399359009965998220>"),
+    "Insane": (256, "<:insane:1399359012490842172>"),
+    "Remorseless": (128, "<:remorseless:1399359014587990110>"),
+    "Intense": (64, "<:intense:1399359016613707777>"),
+    "Challenging": (32, "<:challenging:1399359019172237343>"),
+    "Difficult": (16, "<:difficult:1399359021114462211>"),
+    "Hard": (8, "<:hard:1399359024050212895>"),
+    "Medium": (4, "<:medium:1399359026558664744>"),
+    "Easy": (2, "<:easy:1399359028701692005>")
+}
+
+modifiers = {
+    "Normal": (1, ""),
+    "Lucky": (2, "🍀"),
+    "Hot": (5, "🔥"),
+    "Rainy": (10, "🌧️"),
+    "Mechanical": (16, "⚙️"),
+    "Cold": (20, "❄️"),
+    "Metallic": (25, "🔩"),
+    "Super": (32, "⭐"),
+    "Lunar": (50, "🌙"),
+    "Shiny": (64, "✨"),
+    "Frostbited": (75, "🧊"),
+    "Scorching": (100, "🌶️"),
+    "Mystery": (128, "❓"),
+    "Celestial": (160, "🌌"),
+    "Unusurpable": (256, "👑"),
+    "GODLIKE": (1000, "⚡"),
+    "Otherworldly": (2500, "🌀")
+}
+
+
+def roll_item_once():
+    """Perform a rarity + modifier roll using random.random()."""
+
+    roll_value = random.random()
+    selected_rarity = None
+    selected_chance = None
+
+    # Find the rarest rarity that satisfies 1/value < roll < 1/next_value
+    sorted_rarities = sorted(
+        rarities.items(), key=lambda x: x[1][0])  # smallest value = commonest
+    for name, (val, emoji) in sorted_rarities:
+        chance = 1 / val
+        if roll_value < chance:
+            selected_rarity = name
+            selected_chance = val
+            break
+    # if no rarity matched (roll was high), assign the easiest one
+    if selected_rarity is None:
+        selected_rarity, selected_chance = "Easy", rarities["Easy"][0]
+
+    # Modifiers: independent stacking
+    active_mods = []
+    for mod_name, (val, emoji) in modifiers.items():
+        if mod_name == "Normal":
+            continue
+        if random.random() < (1 / val):
+            active_mods.append(mod_name)
+
+    total_multiplier = 1
+    for mod in active_mods:
+        total_multiplier *= modifiers[mod][0]
+
+    total_rarity = selected_chance * total_multiplier
+
+    # Build visual representation
+    emojis = [
+        modifiers[m][1]
+        for m in sorted(active_mods, key=lambda m: modifiers[m][0])
+    ]
+    emojis.append(rarities[selected_rarity][1])
+
+    emoji_string = " ".join(e for e in emojis if e)
+    text_parts = active_mods + [selected_rarity]
+    text_string = " ".join(text_parts)
+
+    display_name = f"{emoji_string} {text_string}".strip()
+    return display_name, total_rarity
+
+
+# --- DISCORD BOT ---
+
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
+
+
+@client.event
+async def on_ready():
+    print(f'{client.user} has connected to Discord!')
+
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.startswith("!rng.goof"):
+        name, rarity = roll_item_once()
+
+        async with file_lock:
+            stats = load_stats()
+            stats['total_rolls'] = stats.get('total_rolls', 0) + 1
+            roll_number = stats['total_rolls']
+            timestamp_unix = int(datetime.utcnow().timestamp())
+
+            roll_data = {
+                'name': name,
+                'rarity': rarity,
+                'user': str(message.author),
+                'user_id': message.author.id,
+                'server': message.guild.name if message.guild else 'DM',
+                'timestamp': timestamp_unix,
+                'roll_number': roll_number
+            }
+
+            rank = update_leaderboard(stats, roll_data)
+            save_stats(stats)
+
+        display_name = f"**{name.upper()}**" if rarity >= 1000 else name
+        response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
+        if rank:
+            response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard**'
+
+        await message.channel.send(response)
+
+    elif message.content == '!rng.goof leaderboard':
+        async with file_lock:
+            stats = load_stats()
+        leaderboard = stats.get('leaderboard', [])
+
+        if not leaderboard:
+            await message.channel.send('??? no rolls 😔')
+            return
+
+        embed = discord.Embed(title='**RNG GOOF LEADERBOARD:**',
+                              color=0xFFD700)
+        for i, roll in enumerate(leaderboard, 1):
+            timestamp = roll['timestamp']
+            roll_name = roll['name']
+            roll_rarity = roll['rarity']
+            display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+
+            field_value = f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
+            embed.add_field(
+                name=f"#{i} - {display_name} (1 in {roll_rarity:,})",
+                value=field_value,
+                inline=False)
+
+        embed.set_footer(text=f"Total Rolls: {stats.get('total_rolls', 0):,}")
+        await message.channel.send(embed=embed)
+
+
+token = os.getenv('DISCORD_BOT_TOKEN')
+if not token:
+    print('Error: DISCORD_BOT_TOKEN not found in environment variables')
+    exit(1)
+
+keep_alive()
+client.run(token)
