@@ -16,7 +16,7 @@ COOLDOWN_SECONDS = 2
 # GitHub config
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")  # e.g., "username/rng-goof-stats"
-STATS_PATH = os.getenv("STATS_PATH", "stats.json")
+STATS_PATH = "stats.json"
 GITHUB_HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
@@ -253,3 +253,4 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
