@@ -13,9 +13,6 @@ JSONBIN_URL = os.getenv('JSONBIN_URL')
 JSONBIN_KEY = os.getenv('JSONBIN_KEY')
 HEADERS = {'X-Master-Key': JSONBIN_KEY, 'Content-Type': 'application/json'}
 
-cooldowns = {}
-COOLDOWN_TIME = timedelta(seconds=2)
-
 app = Flask('')
 
 @app.route('/')
@@ -178,15 +175,16 @@ async def on_message(message):
     if not message.content.startswith("!rng.goof"):
         return
 
-    now = datetime.utcnow()
+    now = asyncio.get_event_loop().time()
     last_roll = cooldowns.get(message.author.id)
-
-    if last_roll and now - last_roll < COOLDOWN_TIME:
-        remaining = COOLDOWN_TIME - (now - last_roll)
-        await message.channel.send(
-            f"⏳ Slow down, {message.author.mention}! Try again in {remaining.total_seconds():.1f}s."
-        )
+    
+    if last_roll and now - last_roll < 2:
+        remaining = 2 - (now - last_roll)
+        await message.channel.send(f"nrn bozo {message.author.mention}")
         return
+    
+    cooldowns[message.author.id] = now
+
 
     cooldowns[message.author.id] = now
 
@@ -265,6 +263,7 @@ if not token:
 if __name__ == "__main__":
     keep_alive()
     client.run(token)
+
 
 
 
