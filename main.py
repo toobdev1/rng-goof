@@ -128,11 +128,11 @@ async def save_stats(stats):
                 try:
                     response = json.loads(text)
                     stats['_sha'] = response['content']['sha']
-                    print("✅ Stats saved successfully.")
+                    print(" Stats saved successfully.")
                 except Exception as e:
-                    print(f"⚠️ Could not parse GitHub response: {e}\nResponse text:\n{text}")
+                    print(f" Could not parse GitHub response: {e}\nResponse text:\n{text}")
             else:
-                print(f"❌ Failed to save stats to GitHub ({resp.status}): {text}")
+                print(f" Failed to save stats to GitHub ({resp.status}): {text}")
 
                 # Handle SHA mismatch (422)
                 if resp.status == 422 and sha:
@@ -143,9 +143,9 @@ async def save_stats(stats):
                         if retry.status in (200, 201):
                             response = json.loads(retry_text)
                             stats['_sha'] = response['content']['sha']
-                            print("✅ Retry succeeded.")
+                            print(" Retry succeeded.")
                         else:
-                            print(f"❌ Retry failed ({retry.status}): {retry_text}")
+                            print(f" Retry failed ({retry.status}): {retry_text}")
 
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
@@ -274,6 +274,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
