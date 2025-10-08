@@ -238,7 +238,8 @@ if not token:
     print('Error: DISCORD_BOT_TOKEN not found in environment variables')
     exit(1)
 
-keep_alive()
-client.run(token)
+if __name__ == "__main__":
+    keep_alive()
+    client.run(token)
 
 
