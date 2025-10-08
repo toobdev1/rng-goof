@@ -177,9 +177,35 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith("!rng.goof"):
-        name, rarity = roll_item_once()
+    if message.content == "!rng.goof" or (message.content.startswith("!rng.goof ") and not message.content == "!rng.goof"):
+        
+        if message.content.startswith("!rng.goof leaderboard"):
+        async with file_lock:
+            stats = load_stats()
+        leaderboard = stats.get('leaderboard', [])
 
+        if not leaderboard:
+            await message.channel.send('??? no rolls 😔')
+            return
+
+        embed = discord.Embed(title='**RNG GOOF LEADERBOARD:**',
+                              color=0xFFD700)
+        for i, roll in enumerate(leaderboard, 1):
+            timestamp = roll['timestamp']
+            roll_name = roll['name']
+            roll_rarity = roll['rarity']
+            display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+
+            field_value = f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
+            embed.add_field(
+                name=f"#{i} - {display_name} (1 in {roll_rarity:,})",
+                value=field_value,
+                inline=False)
+                
+        name, rarity = roll_item_once()
+        
+    else:
+        
         async with file_lock:
             stats = load_stats()
             stats['total_rolls'] = stats.get('total_rolls', 0) + 1
@@ -205,29 +231,6 @@ async def on_message(message):
             response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard**'
 
         await message.channel.send(response)
-
-    elif message.content == '!rng.goof leaderboard':
-        async with file_lock:
-            stats = load_stats()
-        leaderboard = stats.get('leaderboard', [])
-
-        if not leaderboard:
-            await message.channel.send('??? no rolls 😔')
-            return
-
-        embed = discord.Embed(title='**RNG GOOF LEADERBOARD:**',
-                              color=0xFFD700)
-        for i, roll in enumerate(leaderboard, 1):
-            timestamp = roll['timestamp']
-            roll_name = roll['name']
-            roll_rarity = roll['rarity']
-            display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-
-            field_value = f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
-            embed.add_field(
-                name=f"#{i} - {display_name} (1 in {roll_rarity:,})",
-                value=field_value,
-                inline=False)
 
         embed.set_footer(text=f"Total Rolls: {stats.get('total_rolls', 0):,}")
         await message.channel.send(embed=embed)
