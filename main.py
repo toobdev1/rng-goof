@@ -197,6 +197,11 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
 
+
+        embed.set_footer(text=f"Total Rolls: {stats.get('total_rolls', 0):,}")
+        await message.channel.send(embed=embed)
+        return
+
     # --- Normal Roll Command ---
     name, rarity = roll_item_once()
 
@@ -235,4 +240,5 @@ if not token:
 
 keep_alive()
 client.run(token)
+
 
