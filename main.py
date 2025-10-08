@@ -6,14 +6,21 @@ from datetime import datetime
 from flask import Flask
 import threading
 import aiohttp
+import json
+import base64
 
 # --- CONFIG ---
-JSONBIN_URL = os.getenv('JSONBIN_URL')
-JSONBIN_KEY = os.getenv('JSONBIN_KEY')
-HEADERS = {'X-Master-Key': JSONBIN_KEY, 'Content-Type': 'application/json'}
-
 DISCORD_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 COOLDOWN_SECONDS = 2
+
+# GitHub config
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_REPO = os.getenv("GITHUB_REPO")  # e.g., "username/rng-goof-stats"
+STATS_PATH = os.getenv("STATS_PATH", "stats.json")
+GITHUB_HEADERS = {
+    "Authorization": f"token {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github.v3+json"
+}
 
 # --- GLOBALS ---
 cooldowns = {}
@@ -83,31 +90,43 @@ modifiers = {
     "Otherworldly": (2500, "🌀")
 }
 
-# --- ASYNC JSONBIN FUNCTIONS ---
+# --- GITHUB STATS FUNCTIONS ---
 async def load_stats():
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
     async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(JSONBIN_URL, headers=HEADERS) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    # Ensure required keys exist
-                    data.setdefault('total_rolls', 0)
-                    data.setdefault('leaderboard', [])
-                    return data
-        except Exception as e:
-            print("Error loading stats:", e)
-    return None
+        async with session.get(url, headers=GITHUB_HEADERS) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                content = base64.b64decode(data['content']).decode()
+                stats = json.loads(content)
+                stats.setdefault('total_rolls', 0)
+                stats.setdefault('leaderboard', [])
+                stats['_sha'] = data['sha']  # needed for updating
+                return stats
+            else:
+                text = await resp.text()
+                print(f"Failed to load stats from GitHub: {resp.status} - {text}")
+                return {"total_rolls": 0, "leaderboard": []}
 
 async def save_stats(stats):
+    sha = stats.pop('_sha', None)
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
+    payload = {
+        "message": f"Update stats - total rolls {stats['total_rolls']}",
+        "content": base64.b64encode(json.dumps(stats, indent=2).encode()).decode()
+    }
+    if sha:
+        payload["sha"] = sha
     async with aiohttp.ClientSession() as session:
-        try:
-            async with session.put(JSONBIN_URL, headers=HEADERS, json=stats) as resp:
-                if resp.status != 200:
-                    text = await resp.text()
-                    print("Error saving stats:", text)
-        except Exception as e:
-            print("Error saving stats:", e)
+        async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
+            if resp.status not in (200, 201):
+                text = await resp.text()
+                print(f"Failed to save stats to GitHub: {resp.status} - {text}")
+            else:
+                response = await resp.json()
+                stats['_sha'] = response['content']['sha']
 
+# --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
     leaderboard = stats.get('leaderboard', [])
     leaderboard.append(roll_data)
@@ -173,7 +192,6 @@ async def on_message(message):
     if not message.content.startswith("!rng.goof"):
         return
 
-    # Cooldown check
     now = asyncio.get_event_loop().time()
     last_roll = cooldowns.get(message.author.id)
     if last_roll and now - last_roll < COOLDOWN_SECONDS:
@@ -185,10 +203,6 @@ async def on_message(message):
     if message.content.strip() == "!rng.goof leaderboard":
         async with file_lock:
             stats = await load_stats()
-            if not stats:
-                await message.channel.send("Error: Could not load stats.")
-                return
-
         leaderboard = stats.get('leaderboard', [])
         if not leaderboard:
             await message.channel.send('??? no rolls 😔')
@@ -210,13 +224,9 @@ async def on_message(message):
     name, rarity = roll_item_once()
     async with file_lock:
         stats = await load_stats()
-        if not stats:
-            await message.channel.send("Error: Could not load stats.")
-            return
         stats['total_rolls'] += 1
         roll_number = stats['total_rolls']
         timestamp_unix = int(datetime.utcnow().timestamp())
-
         roll_data = {
             'name': name,
             'rarity': rarity,
@@ -226,7 +236,6 @@ async def on_message(message):
             'timestamp': timestamp_unix,
             'roll_number': roll_number
         }
-
         rank = update_leaderboard(stats, roll_data)
         await save_stats(stats)
 
