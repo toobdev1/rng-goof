@@ -7,6 +7,11 @@ from datetime import datetime
 from flask import Flask
 import threading
 from datetime import datetime, timedelta
+import requests
+
+JSONBIN_URL = os.getenv('JSONBIN_URL')
+JSONBIN_KEY = os.getenv('JSONBIN_KEY')
+HEADERS = {'X-Master-Key': JSONBIN_KEY, 'Content-Type': 'application/json'}
 
 cooldowns = {}
 COOLDOWN_TIME = timedelta(seconds=2)
@@ -32,18 +37,21 @@ file_lock = asyncio.Lock()  # concurrency protection
 
 def load_stats():
     try:
-        with open(STATS_FILE, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {'total_rolls': 0, 'leaderboard': []}
+        res = requests.get(JSONBIN_URL, headers=HEADERS)
+        if res.status_code == 200:
+            return res.json()
+    except Exception as e:
+        print("Error loading stats:", e)
+    return {'total_rolls': 0, 'leaderboard': []}
 
 
 def save_stats(stats):
-    temp_file = STATS_FILE + '.tmp'
-    with open(temp_file, 'w') as f:
-        json.dump(stats, f, indent=2)
-    os.replace(temp_file, STATS_FILE)
-
+    try:
+        res = requests.put(JSONBIN_URL, headers=HEADERS, json=stats)
+        if res.status_code != 200:
+            print("Error saving stats:", res.text)
+    except Exception as e:
+        print("Error saving stats:", e)
 
 def update_leaderboard(stats, roll_data):
     leaderboard = stats.get('leaderboard', [])
@@ -257,6 +265,7 @@ if not token:
 if __name__ == "__main__":
     keep_alive()
     client.run(token)
+
 
 
 
