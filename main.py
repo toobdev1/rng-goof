@@ -46,9 +46,9 @@ async def save_stats(stats):
                 try:
                     response = json.loads(text)
                     stats['_sha'] = response['content']['sha']
-                    print("[SAVE_STATS] ✅ Stats saved successfully.")
+                    print("[SAVE_STATS]  Stats saved successfully.")
                 except Exception as e:
-                    print(f"[SAVE_STATS] ⚠️ JSON parse failed: {e}")
+                    print(f"[SAVE_STATS]  JSON parse failed: {e}")
             elif resp.status == 422 and sha:
                 print("[SAVE_STATS] ⚙️ SHA mismatch — retrying without SHA.")
                 payload.pop("sha", None)
@@ -58,8 +58,9 @@ async def save_stats(stats):
                     if retry.status in (200, 201):
                         response = json.loads(retry_text)
                         stats['_sha'] = response['content']['sha']
-                        print("[SAVE_STATS] ✅ Retry succeeded.")
+                        print("[SAVE_STATS]  Retry succeeded.")
                     else:
-                        print("[SAVE_STATS] ❌ Retry failed.")
+                        print("[SAVE_STATS]  Retry failed.")
             else:
-                print(f"[SAVE_STATS] ❌ Failed ({resp.status}) — full body:\n{text}")
+                print(f"[SAVE_STATS]  Failed ({resp.status}) — full body:\n{text}")
+
