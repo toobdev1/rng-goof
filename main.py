@@ -9,6 +9,8 @@ import threading
 from datetime import datetime, timedelta
 import requests
 
+cooldowns = {}
+
 JSONBIN_URL = os.getenv('JSONBIN_URL')
 JSONBIN_KEY = os.getenv('JSONBIN_KEY')
 HEADERS = {'X-Master-Key': JSONBIN_KEY, 'Content-Type': 'application/json'}
@@ -263,6 +265,7 @@ if not token:
 if __name__ == "__main__":
     keep_alive()
     client.run(token)
+
 
 
 
