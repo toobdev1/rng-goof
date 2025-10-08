@@ -88,20 +88,20 @@ rarities = {
 
 modifiers = {
     "Normal": (1, ""),
-    "Lucky": (2, "🍀"),
-    "Hot": (5, "🔥"),
-    "Rainy": (10, "🌧️"),
-    "Mechanical": (16, "⚙️"),
-    "Cold": (20, "❄️"),
-    "Metallic": (25, "🔩"),
-    "Super": (32, "⭐"),
-    "Lunar": (50, "🌙"),
-    "Shiny": (64, "✨"),
-    "Frostbited": (75, "🧊"),
-    "Scorching": (100, "🌶️"),
-    "Mystery": (128, "❓"),
-    "Celestial": (160, "🌌"),
-    "Unusurpable": (256, "👑"),
+    "Lucky": (4, "🍀"),
+    "Hot": (8, "🔥"),
+    "Rainy": (16, "🌧️"),
+    "Mechanical": (20, "⚙️"),
+    "Cold": (25, "❄️"),
+    "Metallic": (48, "🔩"),
+    "Super": (64, "⭐"),
+    "Lunar": (96, "🌙"),
+    "Shiny": (100, "✨"),
+    "Frostbited": (128, "🧊"),
+    "Scorching": (160, "🌶️"),
+    "Mystery": (200, "❓"),
+    "Celestial": (256, "🌌"),
+    "Unusurpable": (512, "👑"),
     "GODLIKE": (1000, "⚡"),
     "Otherworldly": (2500, "🌀")
 }
@@ -235,3 +235,4 @@ if not token:
 
 keep_alive()
 client.run(token)
+
