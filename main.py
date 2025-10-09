@@ -95,21 +95,21 @@ modifiers = {
 # --- GITHUB STATS FUNCTIONS ---
 async def load_stats():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
-    await channel.send(f"Fetching from GitHub: {url}")
+    print(f"Fetching from GitHub: {url}")
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=GITHUB_HEADERS) as resp:
             text = await resp.text()
-            await channel.send(f"🔹 GitHub status: {resp.status}")
-            await channel.send(f"🔹 GitHub response (first 500 chars):\n{text[:500]}")
+            print(f"🔹 GitHub status: {resp.status}")
+            print(f"🔹 GitHub response (first 500 chars):\n{text[:500]}")
             try:
                 data = json.loads(text)
             except Exception as e:
-                await channel.send(f"Could not decode GitHub JSON: {e}")
+                print(f"Could not decode GitHub JSON: {e}")
                 return {"total_rolls": 0, "leaderboard": []}
 
             # If GitHub returned an error object
             if "message" in data and "content" not in data:
-                await channel.send(f"GitHub API error: {data['message']}")
+                print(f"GitHub API error: {data['message']}")
                 return {"total_rolls": 0, "leaderboard": []}
 
             # If success, decode stats.json content
@@ -117,13 +117,13 @@ async def load_stats():
                 content = base64.b64decode(data["content"]).decode()
                 stats = json.loads(content)
             except Exception as e:
-                await channel.send(f"❌ Could not decode stats.json content: {e}")
+                print(f"❌ Could not decode stats.json content: {e}")
                 return {"total_rolls": 0, "leaderboard": []}
 
             stats.setdefault("total_rolls", 0)
             stats.setdefault("leaderboard", [])
             stats["_sha"] = data.get("sha", None)
-            await channel.send("Stats loaded successfully.")
+            print("Stats loaded successfully.")
             return stats
 
 async def save_stats(stats, retry=1):
@@ -215,7 +215,7 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    await channel.send(f'{client.user} has connected to Discord!')
+    print(f'{client.user} has connected to Discord!')
 
 @client.event
 async def on_message(message):
@@ -279,12 +279,12 @@ async def on_message(message):
 
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
-    await channel.send('Error: DISCORD_BOT_TOKEN not found in environment variables')
     exit(1)
 
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
