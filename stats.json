@@ -1,5 +1,5 @@
 {
-  "total_rolls": 131,
+  "total_rolls": 132,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -27,6 +27,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998809,
       "roll_number": 25
+    },
+    {
+      "name": "\u26a1 <:easy:1399359028701692005> GODLIKE Easy",
+      "rarity": 2000,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760000039,
+      "roll_number": 132
     },
     {
       "name": "\u2744 <:intense:1399359016613707777> Cold Intense",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998793,
       "roll_number": 22
-    },
-    {
-      "name": "\u2b50 <:medium:1399359026558664744> Super Medium",
-      "rarity": 256,
-      "user": "caramelfenic",
-      "user_id": 786536500748746753,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998830,
-      "roll_number": 28
     }
   ]
 }
