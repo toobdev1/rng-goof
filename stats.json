@@ -1,5 +1,5 @@
 {
-  "total_rolls": 9,
+  "total_rolls": 10,
   "leaderboard": [
     {
       "name": "\ud83d\udd25 <:intense:1399359016613707777> Hot Intense",
@@ -81,6 +81,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998176,
       "roll_number": 8
+    },
+    {
+      "name": "<:easy:1399359028701692005> Easy",
+      "rarity": 2,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759998191,
+      "roll_number": 10
     }
   ]
 }
