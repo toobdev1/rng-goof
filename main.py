@@ -12,6 +12,8 @@ import base64
 # --- CONFIG ---
 DISCORD_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 COOLDOWN_SECONDS = 2
+LOG_CHANNEL_ID = 1424408625824399380
+channel = client.get_channel(LOG_CHANNEL_ID)
 
 # GitHub config
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -93,21 +95,21 @@ modifiers = {
 # --- GITHUB STATS FUNCTIONS ---
 async def load_stats():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
-    print(f"Fetching from GitHub: {url}")
+    await channel.send(f"Fetching from GitHub: {url}")
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=GITHUB_HEADERS) as resp:
             text = await resp.text()
-            print(f"🔹 GitHub status: {resp.status}")
-            print(f"🔹 GitHub response (first 500 chars):\n{text[:500]}")
+            await channel.send(f"🔹 GitHub status: {resp.status}")
+            await channel.send(f"🔹 GitHub response (first 500 chars):\n{text[:500]}")
             try:
                 data = json.loads(text)
             except Exception as e:
-                print(f"Could not decode GitHub JSON: {e}")
+                await channel.send(f"Could not decode GitHub JSON: {e}")
                 return {"total_rolls": 0, "leaderboard": []}
 
             # If GitHub returned an error object
             if "message" in data and "content" not in data:
-                print(f"GitHub API error: {data['message']}")
+                await channel.send(f"GitHub API error: {data['message']}")
                 return {"total_rolls": 0, "leaderboard": []}
 
             # If success, decode stats.json content
@@ -115,13 +117,13 @@ async def load_stats():
                 content = base64.b64decode(data["content"]).decode()
                 stats = json.loads(content)
             except Exception as e:
-                print(f"❌ Could not decode stats.json content: {e}")
+                await channel.send(f"❌ Could not decode stats.json content: {e}")
                 return {"total_rolls": 0, "leaderboard": []}
 
             stats.setdefault("total_rolls", 0)
             stats.setdefault("leaderboard", [])
             stats["_sha"] = data.get("sha", None)
-            print("Stats loaded successfully.")
+            await channel.send("Stats loaded successfully.")
             return stats
 
 async def save_stats(stats):
@@ -137,18 +139,18 @@ async def save_stats(stats):
     async with aiohttp.ClientSession() as session:
         async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
             text = await resp.text()
-            print(f"GitHub save status: {resp.status}")
-            print(f"GitHub save response:\n{text[:300]}")
+            await channel.send(f"GitHub save status: {resp.status}")
+            await channel.send(f"GitHub save response:\n{text[:300]}")
 
             if resp.status in (200, 201):
                 try:
                     response = json.loads(text)
                     stats['_sha'] = response['content']['sha']
-                    print("Stats saved successfully.")
+                    await channel.send("Stats saved successfully.")
                 except Exception as e:
-                    print(f"Could not parse GitHub response: {e}")
+                    await channel.send(f"Could not parse GitHub response: {e}")
             else:
-                print(f"Failed to save stats to GitHub ({resp.status}): {text}")
+                await channel.send(f"Failed to save stats to GitHub ({resp.status}): {text}")
 
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
@@ -205,7 +207,7 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+    await channel.send(f'{client.user} has connected to Discord!')
 
 @client.event
 async def on_message(message):
@@ -269,11 +271,12 @@ async def on_message(message):
 
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
-    print('Error: DISCORD_BOT_TOKEN not found in environment variables')
+    await channel.send('Error: DISCORD_BOT_TOKEN not found in environment variables')
     exit(1)
 
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
