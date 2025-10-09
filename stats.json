@@ -1,5 +1,5 @@
 {
-  "total_rolls": 74,
+  "total_rolls": 75,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -27,6 +27,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759999500,
       "roll_number": 50
+    },
+    {
+      "name": "\ud83c\udf40 \ud83c\udf19 <:easy:1399359028701692005> Lucky Lunar Easy",
+      "rarity": 768,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759999836,
+      "roll_number": 75
     },
     {
       "name": "\u2699\ufe0f <:challenging:1399359019172237343> Mechanical Challenging",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759999765,
       "roll_number": 52
-    },
-    {
-      "name": "\ud83c\udf40 \u2699\ufe0f <:easy:1399359028701692005> Lucky Mechanical Easy",
-      "rarity": 160,
-      "user": "caramelfenic",
-      "user_id": 786536500748746753,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998879,
-      "roll_number": 36
     }
   ]
 }
