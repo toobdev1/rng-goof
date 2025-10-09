@@ -1,5 +1,5 @@
 {
-  "total_rolls": 15,
+  "total_rolls": 16,
   "leaderboard": [
     {
       "name": "\ud83d\udd25 <:intense:1399359016613707777> Hot Intense",
@@ -9,6 +9,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998175,
       "roll_number": 7
+    },
+    {
+      "name": "\u2744\ufe0f <:easy:1399359028701692005> Cold Easy",
+      "rarity": 50,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759998491,
+      "roll_number": 16
     },
     {
       "name": "\ud83d\udd25 <:easy:1399359028701692005> Hot Easy",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998163,
       "roll_number": 3
-    },
-    {
-      "name": "<:easy:1399359028701692005> Easy",
-      "rarity": 2,
-      "user": "caramelfenic",
-      "user_id": 786536500748746753,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998169,
-      "roll_number": 5
     }
   ]
 }
