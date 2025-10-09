@@ -126,7 +126,7 @@ async def load_stats():
             await channel.send("Stats loaded successfully.")
             return stats
 
-async def save_stats(stats):
+async def save_stats(stats, retry=1):
     sha = stats.pop('_sha', None)
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
     payload = {
@@ -139,18 +139,26 @@ async def save_stats(stats):
     async with aiohttp.ClientSession() as session:
         async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
             text = await resp.text()
-            await channel.send(f"GitHub save status: {resp.status}")
-            await channel.send(f"GitHub save response:\n{text[:300]}")
+            status = resp.status
+            print(f"GitHub save status: {status}")
 
-            if resp.status in (200, 201):
-                try:
-                    response = json.loads(text)
-                    stats['_sha'] = response['content']['sha']
-                    await channel.send("Stats saved successfully.")
-                except Exception as e:
-                    await channel.send(f"Could not parse GitHub response: {e}")
-            else:
-                await channel.send(f"Failed to save stats to GitHub ({resp.status}): {text}")
+            if status in (200, 201):
+                data = json.loads(text)
+                stats["_sha"] = data["content"]["sha"]
+                print(" Stats saved successfully.")
+                return True
+                
+            if status == 422 and retry > 0:
+                print(" Save conflict detected, reloading and retrying...")
+                new_stats = await load_stats()
+                new_stats.update({
+                    "total_rolls": stats["total_rolls"],
+                    "leaderboard": stats["leaderboard"]
+                })
+                return await save_stats(new_stats, retry - 1)
+
+            print(f" Failed to save stats ({status}): {text}")
+            return False
 
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
@@ -277,6 +285,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
