@@ -2,7 +2,7 @@
   "total_rolls": 50,
   "leaderboard": [
     {
-      "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> MECHANICAL SUPER SCORCHING MEDIUM",
+      "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
       "rarity": 819200,
       "user": "hexadec1m6l",
       "user_id": 852902289270243388,
@@ -18,6 +18,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998809,
       "roll_number": 25
+    },
+    {
+      "name": "\u2744 <:intense:1399359016613707777> Cold Intense",
+      "rarity": 1600,
+      "user": "caramelfenic",
+      "user_id": 786536500748746753,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759999500,
+      "roll_number": 50
     },
     {
       "name": "\u2699\ufe0f <:challenging:1399359019172237343> Mechanical Challenging",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998512,
       "roll_number": 21
-    },
-    {
-      "name": "\ud83c\udf40 <:difficult:1399359021114462211> Lucky Difficult",
-      "rarity": 64,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998499,
-      "roll_number": 18
     }
   ]
 }
