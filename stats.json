@@ -1,5 +1,5 @@
 {
-  "total_rolls": 2,
+  "total_rolls": 3,
   "leaderboard": [
     {
       "name": "\ud83d\udd25 <:easy:1399359028701692005> Hot Easy",
@@ -18,6 +18,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998128,
       "roll_number": 1
+    },
+    {
+      "name": "<:easy:1399359028701692005> Easy",
+      "rarity": 2,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759998163,
+      "roll_number": 3
     }
   ]
 }
