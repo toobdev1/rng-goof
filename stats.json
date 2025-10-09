@@ -1,5 +1,5 @@
 {
-  "total_rolls": 35,
+  "total_rolls": 36,
   "leaderboard": [
     {
       "name": "\u2699\ufe0f \u2b50 <:easy:1399359028701692005> Mechanical Super Easy",
@@ -47,6 +47,15 @@
       "roll_number": 28
     },
     {
+      "name": "\ud83c\udf40 \u2699\ufe0f <:easy:1399359028701692005> Lucky Mechanical Easy",
+      "rarity": 160,
+      "user": "caramelfenic",
+      "user_id": 786536500748746753,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759998879,
+      "roll_number": 36
+    },
+    {
       "name": "\u2699\ufe0f <:medium:1399359026558664744> Mechanical Medium",
       "rarity": 80,
       "user": "hexadec1m6l",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998799,
       "roll_number": 23
-    },
-    {
-      "name": "\u2744\ufe0f <:easy:1399359028701692005> Cold Easy",
-      "rarity": 50,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998834,
-      "roll_number": 29
     }
   ]
 }
