@@ -1,6 +1,15 @@
 {
-  "total_rolls": 48,
+  "total_rolls": 49,
   "leaderboard": [
+    {
+      "name": "\u2699\u2b50\u1f336 <:medium:1399359026558664744> MECHANICAL SUPER SCORCHING MEDIUM",
+      "rarity": 819200,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759918920,
+      "roll_number": 49
+    },
     {
       "name": "\u2699\ufe0f \u2b50 <:easy:1399359028701692005> Mechanical Super Easy",
       "rarity": 2560,
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998499,
       "roll_number": 18
-    },
-    {
-      "name": "\u2744\ufe0f <:easy:1399359028701692005> Cold Easy",
-      "rarity": 50,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998491,
-      "roll_number": 16
     }
   ]
 }
