@@ -1,6 +1,15 @@
 {
-  "total_rolls": 24,
+  "total_rolls": 25,
   "leaderboard": [
+    {
+      "name": "\u2699\ufe0f \u2b50 <:easy:1399359028701692005> Mechanical Super Easy",
+      "rarity": 2560,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1759998809,
+      "roll_number": 25
+    },
     {
       "name": "\ud83d\udd25 <:intense:1399359016613707777> Hot Intense",
       "rarity": 512,
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998207,
       "roll_number": 12
-    },
-    {
-      "name": "<:difficult:1399359021114462211> Difficult",
-      "rarity": 16,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1759998485,
-      "roll_number": 15
     }
   ]
 }
