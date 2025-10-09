@@ -1,5 +1,5 @@
 {
-  "total_rolls": 329,
+  "total_rolls": 330,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -47,6 +47,15 @@
       "roll_number": 175
     },
     {
+      "name": "\ud83c\udf40 \u2699\ufe0f \ud83e\uddca <:easy:1399359028701692005> Lucky Mechanical Frostbited Easy",
+      "rarity": 20480,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760004087,
+      "roll_number": 330
+    },
+    {
       "name": "\ud83c\udf40 \ud83d\udd25 \ud83c\udf0c <:easy:1399359028701692005> Lucky Hot Celestial Easy",
       "rarity": 16384,
       "user": "hexadec1m6l",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1760001552,
       "roll_number": 229
-    },
-    {
-      "name": "\ud83d\udd25 \u2753 <:easy:1399359028701692005> Hot Mystery Easy",
-      "rarity": 3200,
-      "user": "caramelfenic",
-      "user_id": 786536500748746753,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1760002003,
-      "roll_number": 282
     }
   ]
 }
