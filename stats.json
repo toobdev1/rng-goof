@@ -1,5 +1,5 @@
 {
-  "total_rolls": 166,
+  "total_rolls": 167,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -27,6 +27,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1759998809,
       "roll_number": 25
+    },
+    {
+      "name": "\ud83d\udd25 <:insane:1399359012490842172> Hot Insane",
+      "rarity": 2048,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760000228,
+      "roll_number": 167
     },
     {
       "name": "\u26a1 <:easy:1399359028701692005> GODLIKE Easy",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1760000168,
       "roll_number": 157
-    },
-    {
-      "name": "\ud83c\udf27\ufe0f \u2699\ufe0f <:easy:1399359028701692005> Rainy Mechanical Easy",
-      "rarity": 640,
-      "user": "caramelfenic",
-      "user_id": 786536500748746753,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1760000207,
-      "roll_number": 163
     }
   ]
 }
