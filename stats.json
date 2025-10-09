@@ -1,5 +1,5 @@
 {
-  "total_rolls": 228,
+  "total_rolls": 229,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -56,6 +56,15 @@
       "roll_number": 201
     },
     {
+      "name": "\ud83d\udd29 <:remorseless:1399359014587990110> Metallic Remorseless",
+      "rarity": 6144,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760001552,
+      "roll_number": 229
+    },
+    {
       "name": "\ud83c\udf40 \ud83d\udd25 \ud83d\udd29 <:easy:1399359028701692005> Lucky Hot Metallic Easy",
       "rarity": 3072,
       "user": "hexadec1m6l",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1760000228,
       "roll_number": 167
-    },
-    {
-      "name": "\u26a1 <:easy:1399359028701692005> GODLIKE Easy",
-      "rarity": 2000,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1760000039,
-      "roll_number": 132
     }
   ]
 }
