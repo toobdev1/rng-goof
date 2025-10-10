@@ -308,33 +308,7 @@ async def on_message(message):
     if rank:
         response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
     await message.channel.send(response)
-
-
-    # Normal roll
-    name, rarity = roll_item_once()
-    async with file_lock:
-        stats = await load_stats()
-        stats['total_rolls'] += 1
-        roll_number = stats['total_rolls']
-        timestamp_unix = int(datetime.utcnow().timestamp())
-        roll_data = {
-            'name': name,
-            'rarity': rarity,
-            'user': str(message.author),
-            'user_id': message.author.id,
-            'server': message.guild.name if message.guild else 'DM',
-            'timestamp': timestamp_unix,
-            'roll_number': roll_number
-        }
-        rank = update_leaderboard(stats, roll_data)
-        await save_stats(stats)
-
-    display_name = f"**{name.upper()}**" if rarity >= 1000 else name
-    response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
-    if rank:
-        response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-    await message.channel.send(response)
-
+    
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
     exit(1)
@@ -342,6 +316,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
