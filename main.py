@@ -223,6 +223,39 @@ async def on_message(message):
     if not message.content.startswith("!rng.goof"):
         return
 
+    guild_id = message.guild.id if message.guild else None
+
+    # Load or initialize roll_channels.json to store per-server roll channels
+    if not os.path.exists("roll_channels.json"):
+        with open("roll_channels.json", "w") as f:
+            json.dump({}, f)
+
+    with open("roll_channels.json", "r") as f:
+        roll_channels = json.load(f)
+
+    # --- SETUP COMMAND ---
+    if message.content.strip() == "!rng.goof setup":
+        if not guild_id:
+            await message.channel.send("You can only use this command in a server.")
+            return
+
+        roll_channels[str(guild_id)] = message.channel.id
+        with open("roll_channels.json", "w") as f:
+            json.dump(roll_channels, f, indent=2)
+        await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
+        return
+
+    # --- CHECK ROLL CHANNEL ---
+    if not guild_id or str(guild_id) not in roll_channels:
+        await message.channel.send("no channel to roll in")
+        return
+
+    roll_channel_id = roll_channels[str(guild_id)]
+    if message.channel.id != roll_channel_id:
+        await message.channel.send("You can only use this command in the roll channel.")
+        return
+
+    # --- COOLDOWN CHECK ---
     now = asyncio.get_event_loop().time()
     last_roll = cooldowns.get(message.author.id)
     if last_roll and now - last_roll < COOLDOWN_SECONDS:
@@ -230,13 +263,13 @@ async def on_message(message):
         return
     cooldowns[message.author.id] = now
 
-    # Leaderboard command
+    # --- LEADERBOARD COMMAND ---
     if message.content.strip() == "!rng.goof leaderboard":
         async with file_lock:
             stats = await load_stats()
         leaderboard = stats.get('leaderboard', [])
         if not leaderboard:
-            await message..send('??? no rolls 😔')
+            await message.channel.send('??? no rolls 😔')
             return
 
         embed = discord.Embed(title='**RNG GOOF LEADERBOARD:**', color=0xFFD700)
@@ -248,8 +281,34 @@ async def on_message(message):
             field_value = f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
             embed.add_field(name=f"#{i} - {display_name} (1 in {roll_rarity:,})", value=field_value, inline=False)
         embed.set_footer(text=f"Total Rolls: {stats.get('total_rolls', 0):,}")
-        await message..send(embed=embed)
+        await message.channel.send(embed=embed)
         return
+
+    # --- NORMAL ROLL ---
+    name, rarity = roll_item_once()
+    async with file_lock:
+        stats = await load_stats()
+        stats['total_rolls'] += 1
+        roll_number = stats['total_rolls']
+        timestamp_unix = int(datetime.utcnow().timestamp())
+        roll_data = {
+            'name': name,
+            'rarity': rarity,
+            'user': str(message.author),
+            'user_id': message.author.id,
+            'server': message.guild.name if message.guild else 'DM',
+            'timestamp': timestamp_unix,
+            'roll_number': roll_number
+        }
+        rank = update_leaderboard(stats, roll_data)
+        await save_stats(stats)
+
+    display_name = f"**{name.upper()}**" if rarity >= 1000 else name
+    response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
+    if rank:
+        response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
+    await message.channel.send(response)
+
 
     # Normal roll
     name, rarity = roll_item_once()
@@ -283,6 +342,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
