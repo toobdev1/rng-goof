@@ -1,5 +1,5 @@
 {
-  "total_rolls": 567,
+  "total_rolls": 568,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -83,13 +83,13 @@
       "roll_number": 380
     },
     {
-      "name": "\ud83d\udd25\ud83c\udf27\ufe0f\ud83e\uddca <:easy:1399359028701692005> Hot Rainy Frostbited Easy",
-      "rarity": 7500,
+      "name": "\u2699\ufe0f \u2744\ufe0f <:difficult:1399359021114462211> Mechanical Cold Difficult",
+      "rarity": 8000,
       "user": "hexadec1m6l",
       "user_id": 852902289270243388,
-      "server": "hanako testing server",
-      "timestamp": 1760088600,
-      "roll_number": 201
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760098824,
+      "roll_number": 568
     }
   ]
 }
