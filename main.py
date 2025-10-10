@@ -234,30 +234,47 @@ async def on_message(message):
         roll_channels = json.load(f)
 
     # --- GLOBAL LOCK FOR CHANNEL SETUP ---
-channel_lock = asyncio.Lock()
-
-# --- SETUP COMMAND ---
-if message.content.strip() == "!rng.goof setup":
-    if not guild_id:
-        await message.channel.send("You can only use this command in a server.")
+    channel_lock = asyncio.Lock()
+    
+    # --- SETUP COMMAND ---
+    if message.content.strip() == "!rng.goof setup":
+        if not guild_id:
+            await message.channel.send("You can only use this command in a server.")
+            return
+    
+        async with channel_lock:
+            # Load roll_channels from GitHub
+            async with aiohttp.ClientSession() as session:
+                url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/roll_channels.json"
+                async with session.get(url, headers=GITHUB_HEADERS) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        content = base64.b64decode(data["content"]).decode()
+                        roll_channels = json.loads(content)
+                        roll_channels_sha = data.get("sha")
+                    else:
+                        roll_channels = {}
+                        roll_channels_sha = None
+    
+            # Update roll_channels
+            roll_channels[str(guild_id)] = message.channel.id
+    
+            # Save back to GitHub
+            payload = {
+                "message": f"Update roll channel for server {guild_id}",
+                "content": base64.b64encode(json.dumps(roll_channels, indent=2).encode()).decode()
+            }
+            if roll_channels_sha:
+                payload["sha"] = roll_channels_sha
+    
+            async with aiohttp.ClientSession() as session:
+                async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
+                    if resp.status in (200, 201):
+                        await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
+                    else:
+                        text = await resp.text()
+                        await message.channel.send(f"Failed to save roll channel to GitHub: {resp.status}\n{text}")
         return
-
-    async with channel_lock:
-        # Load existing roll channels
-        if not os.path.exists("roll_channels.json"):
-            with open("roll_channels.json", "w") as f:
-                json.dump({}, f)
-
-        with open("roll_channels.json", "r") as f:
-            roll_channels = json.load(f)
-
-        # Update and save
-        roll_channels[str(guild_id)] = message.channel.id
-        with open("roll_channels.json", "w") as f:
-            json.dump(roll_channels, f, indent=2)
-
-    await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
-    return
 
     # --- CHECK ROLL CHANNEL ---
     if not guild_id or str(guild_id) not in roll_channels:
@@ -316,12 +333,23 @@ if message.content.strip() == "!rng.goof setup":
         }
         rank = update_leaderboard(stats, roll_data)
         await save_stats(stats)
-
+    
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
         response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
+    
     await message.channel.send(response)
+    
+    # --- RIP MESSAGE ---
+    # Only send if the new roll actually made the top 10
+    leaderboard = stats.get('leaderboard', [])
+    if rank and len(leaderboard) >= 10:
+        # Get the #10 roll rarity
+        tenth_roll = leaderboard[-1]
+        rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
+        await message.channel.send(rip_msg)
+
     
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
@@ -330,6 +358,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
