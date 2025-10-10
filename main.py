@@ -233,17 +233,31 @@ async def on_message(message):
     with open("roll_channels.json", "r") as f:
         roll_channels = json.load(f)
 
-    # --- SETUP COMMAND ---
-    if message.content.strip() == "!rng.goof setup":
-        if not guild_id:
-            await message.channel.send("You can only use this command in a server.")
-            return
+    # --- GLOBAL LOCK FOR CHANNEL SETUP ---
+channel_lock = asyncio.Lock()
 
+# --- SETUP COMMAND ---
+if message.content.strip() == "!rng.goof setup":
+    if not guild_id:
+        await message.channel.send("You can only use this command in a server.")
+        return
+
+    async with channel_lock:
+        # Load existing roll channels
+        if not os.path.exists("roll_channels.json"):
+            with open("roll_channels.json", "w") as f:
+                json.dump({}, f)
+
+        with open("roll_channels.json", "r") as f:
+            roll_channels = json.load(f)
+
+        # Update and save
         roll_channels[str(guild_id)] = message.channel.id
         with open("roll_channels.json", "w") as f:
             json.dump(roll_channels, f, indent=2)
-        await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
-        return
+
+    await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
+    return
 
     # --- CHECK ROLL CHANNEL ---
     if not guild_id or str(guild_id) not in roll_channels:
@@ -316,6 +330,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
