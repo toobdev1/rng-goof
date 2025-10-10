@@ -12,8 +12,7 @@ import base64
 # --- CONFIG ---
 DISCORD_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 COOLDOWN_SECONDS = 2
-LOG_CHANNEL_ID = 1424408625824399380
-channel = client.get_channel(LOG_CHANNEL_ID)
+
 
 # GitHub config
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -237,7 +236,7 @@ async def on_message(message):
             stats = await load_stats()
         leaderboard = stats.get('leaderboard', [])
         if not leaderboard:
-            await message.channel.send('??? no rolls 😔')
+            await message..send('??? no rolls 😔')
             return
 
         embed = discord.Embed(title='**RNG GOOF LEADERBOARD:**', color=0xFFD700)
@@ -249,7 +248,7 @@ async def on_message(message):
             field_value = f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
             embed.add_field(name=f"#{i} - {display_name} (1 in {roll_rarity:,})", value=field_value, inline=False)
         embed.set_footer(text=f"Total Rolls: {stats.get('total_rolls', 0):,}")
-        await message.channel.send(embed=embed)
+        await message..send(embed=embed)
         return
 
     # Normal roll
@@ -284,6 +283,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     # keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
