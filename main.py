@@ -288,7 +288,7 @@ async def on_message(message):
         return
     cooldowns[message.author.id] = now
 
-    if message.content.strip() == "!rng.goof leaderboard":
+    if message.content.strip() == "!rng.goof debug":
         await message.channel.send(str(bot_id))
         return
             
@@ -352,4 +352,5 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
