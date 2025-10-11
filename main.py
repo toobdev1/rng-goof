@@ -334,16 +334,14 @@ async def on_message(message):
 
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
-    if rank:
-        response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-
-    await message.channel.send(response)
-
+    if rank: response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
+        
     leaderboard = stats.get('leaderboard', [])
     if rank and len(leaderboard) >= 10:
         tenth_roll = leaderboard[-1]
         rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
-        await message.channel.send(rip_msg)
+        response += f"\n{rip_msg}"
+    await message.channel.send(response)
 
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
@@ -352,5 +350,6 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
