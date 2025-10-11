@@ -8,6 +8,7 @@ import threading
 import aiohttp
 import json
 import base64
+from random import randint
 
 # --- CONFIG ---
 DISCORD_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
@@ -26,6 +27,7 @@ GITHUB_HEADERS = {
 # --- GLOBALS ---
 cooldowns = {}
 file_lock = asyncio.Lock()
+bot_id = randint(1,16777216)
 
 # --- FLASK KEEP-ALIVE ---
 app = Flask('')
@@ -286,6 +288,10 @@ async def on_message(message):
         return
     cooldowns[message.author.id] = now
 
+    if message.content.strip() == "!rng.goof leaderboard":
+        await message.channel.send(str(bot_id))
+        return
+            
     # LEADERBOARD command
     if message.content.strip() == "!rng.goof leaderboard":
         async with file_lock:
@@ -344,4 +350,6 @@ if not DISCORD_TOKEN:
     exit(1)
 
 if __name__ == "__main__":
+    keep_alive()
     client.run(DISCORD_TOKEN)
+
