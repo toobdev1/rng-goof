@@ -260,10 +260,9 @@ async def on_message(message):
 
             # Save back to GitHub
             ok = await save_roll_channels(roll_channels)
-            if ok:
-                await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
-            else:
-                await message.channel.send("Failed to save roll channel to GitHub.")
+            if ok: await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")   
+            else: await message.channel.send("Failed to save roll channel to GitHub.")
+                
 
         return
 
@@ -276,9 +275,7 @@ async def on_message(message):
         return
 
     roll_channel_id = roll_channels[str(guild_id)]
-    if message.channel.id != roll_channel_id:
-        await message.channel.send("You can only use this command in the roll channel.")
-        return
+    if message.channel.id != roll_channel_id: return
 
     # COOLDOWN
     now = asyncio.get_event_loop().time()
@@ -292,26 +289,60 @@ async def on_message(message):
         await message.channel.send(str(bot_id))
         return
             
-    # LEADERBOARD command
-    if message.content.strip() == "!rng.goof leaderboard":
-        async with file_lock:
-            stats = await load_stats()
-        leaderboard = stats.get('leaderboard', [])
-        if not leaderboard:
-            await message.channel.send('??? no rolls 😔')
-            return
 
-        embed = discord.Embed(title='**RNG GOOF LEADERBOARD:**', color=0xFFD700)
-        for i, roll in enumerate(leaderboard, 1):
-            timestamp = roll['timestamp']
-            roll_name = roll['name']
-            roll_rarity = roll['rarity']
-            display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-            field_value = f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
-            embed.add_field(name=f"#{i} - {display_name} (1 in {roll_rarity:,})", value=field_value, inline=False)
-        embed.set_footer(text=f"Total Rolls: {stats.get('total_rolls', 0):,}")
-        await message.channel.send(embed=embed)
+    # --- LEADERBOARD command as multi-message plain text ---
+if message.content.strip() == "!rng.goof leaderboard":
+    async with file_lock:
+        stats = await load_stats()
+    leaderboard = stats.get('leaderboard', [])
+    if not leaderboard:
+        await message.channel.send('??? no rolls 😔')
         return
+
+    header = "**RNG GOOF LEADERBOARD:**\n"
+    footer = f"\nTotal Rolls: {stats.get('total_rolls', 0):,}"
+    max_chars = 2000
+
+    # Prepare all leaderboard lines
+    lines = []
+    for i, roll in enumerate(leaderboard[:10], 1):
+        timestamp = int(roll['timestamp'])
+        roll_name = roll['name']
+        roll_rarity = int(roll['rarity'])
+        display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+
+        line = (
+            f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
+            f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
+        )
+
+        # truncate extremely long lines
+        if len(line) > 1000:
+            line = line[:997] + "…"
+
+        lines.append(line)
+
+    # Combine lines into message chunks
+    chunks = []
+    current_chunk = header
+    for line in lines:
+        # +2 for spacing
+        if len(current_chunk) + len(line) + 2 > max_chars:
+            chunks.append(current_chunk.rstrip())
+            current_chunk = ""
+        current_chunk += line + "\n\n"
+    # append footer to last chunk
+    if current_chunk:
+        current_chunk = current_chunk.rstrip() + footer
+        chunks.append(current_chunk)
+
+    # Send each chunk
+    try:
+        for chunk in chunks:
+            await message.channel.send(chunk)
+    except Exception as e:
+        await message.channel.send(f"Failed to send leaderboard: {e}")
+
 
     # NORMAL ROLL
     name, rarity = roll_item_once()
@@ -350,6 +381,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
