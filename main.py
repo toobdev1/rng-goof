@@ -13,11 +13,11 @@ import base64
 DISCORD_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 COOLDOWN_SECONDS = 2
 
-
 # GitHub config
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
 STATS_PATH = "stats.json"
+ROLL_CHANNELS_PATH = "roll_channels.json"
 GITHUB_HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json"
@@ -94,35 +94,20 @@ modifiers = {
 # --- GITHUB STATS FUNCTIONS ---
 async def load_stats():
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{STATS_PATH}"
-    print(f"Fetching from GitHub: {url}")
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=GITHUB_HEADERS) as resp:
             text = await resp.text()
-            print(f"🔹 GitHub status: {resp.status}")
-            print(f"🔹 GitHub response (first 500 chars):\n{text[:500]}")
             try:
                 data = json.loads(text)
             except Exception as e:
-                print(f"Could not decode GitHub JSON: {e}")
                 return {"total_rolls": 0, "leaderboard": []}
-
-            # If GitHub returned an error object
             if "message" in data and "content" not in data:
-                print(f"GitHub API error: {data['message']}")
                 return {"total_rolls": 0, "leaderboard": []}
-
-            # If success, decode stats.json content
-            try:
-                content = base64.b64decode(data["content"]).decode()
-                stats = json.loads(content)
-            except Exception as e:
-                print(f"❌ Could not decode stats.json content: {e}")
-                return {"total_rolls": 0, "leaderboard": []}
-
+            content = base64.b64decode(data["content"]).decode()
+            stats = json.loads(content)
             stats.setdefault("total_rolls", 0)
             stats.setdefault("leaderboard", [])
             stats["_sha"] = data.get("sha", None)
-            print("Stats loaded successfully.")
             return stats
 
 async def save_stats(stats, retry=1):
@@ -134,29 +119,62 @@ async def save_stats(stats, retry=1):
     }
     if sha:
         payload["sha"] = sha
-
     async with aiohttp.ClientSession() as session:
         async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
             text = await resp.text()
             status = resp.status
-            print(f"GitHub save status: {status}")
-
             if status in (200, 201):
                 data = json.loads(text)
                 stats["_sha"] = data["content"]["sha"]
-                print(" Stats saved successfully.")
                 return True
-                
             if status == 422 and retry > 0:
-                print(" Save conflict detected, reloading and retrying...")
                 new_stats = await load_stats()
                 new_stats.update({
                     "total_rolls": stats["total_rolls"],
                     "leaderboard": stats["leaderboard"]
                 })
                 return await save_stats(new_stats, retry - 1)
+            return False
 
-            print(f" Failed to save stats ({status}): {text}")
+# --- GITHUB ROLL CHANNELS FUNCTIONS ---
+async def load_roll_channels():
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{ROLL_CHANNELS_PATH}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=GITHUB_HEADERS) as resp:
+            text = await resp.text()
+            try:
+                data = json.loads(text)
+            except Exception:
+                return {}
+            # if GitHub error
+            if "message" in data and "content" not in data:
+                return {}
+            content = base64.b64decode(data["content"]).decode()
+            roll_channels = json.loads(content)
+            roll_channels["_sha"] = data.get("sha", None)
+            return roll_channels
+
+async def save_roll_channels(roll_channels, retry=1):
+    sha = roll_channels.pop('_sha', None)
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{ROLL_CHANNELS_PATH}"
+    payload = {
+        "message": "Update roll_channels mapping",
+        "content": base64.b64encode(json.dumps(roll_channels, indent=2).encode()).decode()
+    }
+    if sha:
+        payload["sha"] = sha
+    async with aiohttp.ClientSession() as session:
+        async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
+            text = await resp.text()
+            status = resp.status
+            if status in (200, 201):
+                data = json.loads(text)
+                roll_channels["_sha"] = data["content"]["sha"]
+                return True
+            if status == 422 and retry > 0:
+                new_channels = await load_roll_channels()
+                new_channels.update(roll_channels)
+                return await save_roll_channels(new_channels, retry - 1)
             return False
 
 # --- LEADERBOARD HELPERS ---
@@ -225,58 +243,32 @@ async def on_message(message):
 
     guild_id = message.guild.id if message.guild else None
 
-    # Load or initialize roll_channels.json to store per-server roll channels
-    if not os.path.exists("roll_channels.json"):
-        with open("roll_channels.json", "w") as f:
-            json.dump({}, f)
-
-    with open("roll_channels.json", "r") as f:
-        roll_channels = json.load(f)
-
-    # --- GLOBAL LOCK FOR CHANNEL SETUP ---
-    channel_lock = asyncio.Lock()
-    
     # --- SETUP COMMAND ---
     if message.content.strip() == "!rng.goof setup":
         if not guild_id:
             await message.channel.send("You can only use this command in a server.")
             return
-    
-        async with channel_lock:
-            # Load roll_channels from GitHub
-            async with aiohttp.ClientSession() as session:
-                url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/roll_channels.json"
-                async with session.get(url, headers=GITHUB_HEADERS) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        content = base64.b64decode(data["content"]).decode()
-                        roll_channels = json.loads(content)
-                        roll_channels_sha = data.get("sha")
-                    else:
-                        roll_channels = {}
-                        roll_channels_sha = None
-    
+
+        # Load roll_channels from GitHub
+        async with file_lock:
+            roll_channels = await load_roll_channels()
+
             # Update roll_channels
             roll_channels[str(guild_id)] = message.channel.id
-    
+
             # Save back to GitHub
-            payload = {
-                "message": f"Update roll channel for server {guild_id}",
-                "content": base64.b64encode(json.dumps(roll_channels, indent=2).encode()).decode()
-            }
-            if roll_channels_sha:
-                payload["sha"] = roll_channels_sha
-    
-            async with aiohttp.ClientSession() as session:
-                async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
-                    if resp.status in (200, 201):
-                        await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
-                    else:
-                        text = await resp.text()
-                        await message.channel.send(f"Failed to save roll channel to GitHub: {resp.status}\n{text}")
+            ok = await save_roll_channels(roll_channels)
+            if ok:
+                await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")
+            else:
+                await message.channel.send("Failed to save roll channel to GitHub.")
+
         return
 
-    # --- CHECK ROLL CHANNEL ---
+    # --- Other commands / roll logic ---
+    async with file_lock:
+        roll_channels = await load_roll_channels()
+
     if not guild_id or str(guild_id) not in roll_channels:
         await message.channel.send("no channel to roll in")
         return
@@ -286,7 +278,7 @@ async def on_message(message):
         await message.channel.send("You can only use this command in the roll channel.")
         return
 
-    # --- COOLDOWN CHECK ---
+    # COOLDOWN
     now = asyncio.get_event_loop().time()
     last_roll = cooldowns.get(message.author.id)
     if last_roll and now - last_roll < COOLDOWN_SECONDS:
@@ -294,7 +286,7 @@ async def on_message(message):
         return
     cooldowns[message.author.id] = now
 
-    # --- LEADERBOARD COMMAND ---
+    # LEADERBOARD command
     if message.content.strip() == "!rng.goof leaderboard":
         async with file_lock:
             stats = await load_stats()
@@ -315,7 +307,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
 
-    # --- NORMAL ROLL ---
+    # NORMAL ROLL
     name, rarity = roll_item_once()
     async with file_lock:
         stats = await load_stats()
@@ -333,39 +325,23 @@ async def on_message(message):
         }
         rank = update_leaderboard(stats, roll_data)
         await save_stats(stats)
-    
+
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
         response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-    
+
     await message.channel.send(response)
-    
-    # --- RIP MESSAGE ---
-    # Only send if the new roll actually made the top 10
+
     leaderboard = stats.get('leaderboard', [])
     if rank and len(leaderboard) >= 10:
-        # Get the #10 roll rarity
         tenth_roll = leaderboard[-1]
         rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
         await message.channel.send(rip_msg)
 
-    
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
     exit(1)
 
 if __name__ == "__main__":
-    # keep_alive()
     client.run(DISCORD_TOKEN)
-
-
-
-
-
-
-
-
-
-
-
