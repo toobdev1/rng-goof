@@ -288,91 +288,90 @@ async def on_message(message):
     if message.content.strip() == "!rng.goof debug":
         await message.channel.send(str(bot_id))
         return
+    
+        # --- LEADERBOARD command as multi-message plain text ---
+    if message.content.strip() == "!rng.goof leaderboard":
+        async with file_lock:
+            stats = await load_stats()
+        leaderboard = stats.get('leaderboard', [])
+        if not leaderboard:
+            await message.channel.send('??? no rolls 😔')
+            return
+    
+        header = "**RNG GOOF LEADERBOARD:**\n"
+        footer = f"\nTotal Rolls: {stats.get('total_rolls', 0):,}"
+        max_chars = 2000
+    
+        # Prepare all leaderboard lines
+        lines = []
+        for i, roll in enumerate(leaderboard[:10], 1):
+            timestamp = int(roll['timestamp'])
+            roll_name = roll['name']
+            roll_rarity = int(roll['rarity'])
+            display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+    
+            line = (
+                f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
+                f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
+            )
+    
+            # truncate extremely long lines
+            if len(line) > 1000:
+                line = line[:997] + "…"
+    
+            lines.append(line)
+    
+        # Combine lines into message chunks
+        chunks = []
+        current_chunk = header
+        for line in lines:
+            # +2 for spacing
+            if len(current_chunk) + len(line) + 2 > max_chars:
+                chunks.append(current_chunk.rstrip())
+                current_chunk = ""
+            current_chunk += line + "\n\n"
+        # append footer to last chunk
+        if current_chunk:
+            current_chunk = current_chunk.rstrip() + footer
+            chunks.append(current_chunk)
+    
+        # Send each chunk
+        try:
+            for chunk in chunks:
+                await message.channel.send(chunk)
+        except Exception as e:
+            await message.channel.send(f"Failed to send leaderboard: {e}")
+    
+    
+        # NORMAL ROLL
+        name, rarity = roll_item_once()
+        async with file_lock:
+            stats = await load_stats()
+            stats['total_rolls'] += 1
+            roll_number = stats['total_rolls']
+            timestamp_unix = int(datetime.utcnow().timestamp())
+            roll_data = {
+                'name': name,
+                'rarity': rarity,
+                'user': str(message.author),
+                'user_id': message.author.id,
+                'server': message.guild.name if message.guild else 'DM',
+                'timestamp': timestamp_unix,
+                'roll_number': roll_number
+            }
+            rank = update_leaderboard(stats, roll_data)
+            await save_stats(stats)
+    
+        display_name = f"**{name.upper()}**" if rarity >= 1000 else name
+        response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
+        if rank: response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
             
-
-    # --- LEADERBOARD command as multi-message plain text ---
-if message.content.strip() == "!rng.goof leaderboard":
-    async with file_lock:
-        stats = await load_stats()
-    leaderboard = stats.get('leaderboard', [])
-    if not leaderboard:
-        await message.channel.send('??? no rolls 😔')
-        return
-
-    header = "**RNG GOOF LEADERBOARD:**\n"
-    footer = f"\nTotal Rolls: {stats.get('total_rolls', 0):,}"
-    max_chars = 2000
-
-    # Prepare all leaderboard lines
-    lines = []
-    for i, roll in enumerate(leaderboard[:10], 1):
-        timestamp = int(roll['timestamp'])
-        roll_name = roll['name']
-        roll_rarity = int(roll['rarity'])
-        display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-
-        line = (
-            f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
-            f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
-        )
-
-        # truncate extremely long lines
-        if len(line) > 1000:
-            line = line[:997] + "…"
-
-        lines.append(line)
-
-    # Combine lines into message chunks
-    chunks = []
-    current_chunk = header
-    for line in lines:
-        # +2 for spacing
-        if len(current_chunk) + len(line) + 2 > max_chars:
-            chunks.append(current_chunk.rstrip())
-            current_chunk = ""
-        current_chunk += line + "\n\n"
-    # append footer to last chunk
-    if current_chunk:
-        current_chunk = current_chunk.rstrip() + footer
-        chunks.append(current_chunk)
-
-    # Send each chunk
-    try:
-        for chunk in chunks:
-            await message.channel.send(chunk)
-    except Exception as e:
-        await message.channel.send(f"Failed to send leaderboard: {e}")
-
-
-    # NORMAL ROLL
-    name, rarity = roll_item_once()
-    async with file_lock:
-        stats = await load_stats()
-        stats['total_rolls'] += 1
-        roll_number = stats['total_rolls']
-        timestamp_unix = int(datetime.utcnow().timestamp())
-        roll_data = {
-            'name': name,
-            'rarity': rarity,
-            'user': str(message.author),
-            'user_id': message.author.id,
-            'server': message.guild.name if message.guild else 'DM',
-            'timestamp': timestamp_unix,
-            'roll_number': roll_number
-        }
-        rank = update_leaderboard(stats, roll_data)
-        await save_stats(stats)
-
-    display_name = f"**{name.upper()}**" if rarity >= 1000 else name
-    response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
-    if rank: response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-        
-    leaderboard = stats.get('leaderboard', [])
-    if rank and len(leaderboard) >= 10:
-        tenth_roll = leaderboard[-1]
-        rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
-        response += f"\n{rip_msg}"
-    await message.channel.send(response)
+        leaderboard = stats.get('leaderboard', [])
+        if rank and len(leaderboard) >= 10:
+            tenth_roll = leaderboard[-1]
+            rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
+            response += f"\n{rip_msg}"
+        await message.channel.send(response)
 
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
@@ -381,6 +380,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
