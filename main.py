@@ -240,138 +240,132 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    if not message.content.startswith("!rng.goof"):
+    content = message.content.strip()
+
+    if not content.startswith("!rng.goof"):
         return
 
     guild_id = message.guild.id if message.guild else None
 
     # --- SETUP COMMAND ---
-    if message.content.strip() == "!rng.goof setup":
+    if content == "!rng.goof setup":
         if not guild_id:
             await message.channel.send("You can only use this command in a server.")
             return
 
-        # Load roll_channels from GitHub
         async with file_lock:
             roll_channels = await load_roll_channels()
-
-            # Update roll_channels
             roll_channels[str(guild_id)] = message.channel.id
-
-            # Save back to GitHub
             ok = await save_roll_channels(roll_channels)
-            if ok: await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")   
-            else: await message.channel.send("Failed to save roll channel to GitHub.")
-                
-
+            if ok:
+                await message.channel.send(f"This channel ({message.channel.mention}) is now the roll channel!")   
+            else:
+                await message.channel.send("Failed to save roll channel to GitHub.")
         return
 
-    # --- Other commands / roll logic ---
-    async with file_lock:
-        roll_channels = await load_roll_channels()
-
-    if not guild_id or str(guild_id) not in roll_channels:
-        await message.channel.send("no channel to roll in")
-        return
-
-    roll_channel_id = roll_channels[str(guild_id)]
-    if message.channel.id != roll_channel_id: return
-
-    # COOLDOWN
-    now = asyncio.get_event_loop().time()
-    last_roll = cooldowns.get(message.author.id)
-    if last_roll and now - last_roll < COOLDOWN_SECONDS:
-        await message.channel.send(f"nrn bozo {message.author.mention}")
-        return
-    cooldowns[message.author.id] = now
-
-    if message.content.strip() == "!rng.goof debug":
+    # --- DEBUG COMMAND ---
+    if content == "!rng.goof debug":
         await message.channel.send(str(bot_id))
         return
-    
-        # --- LEADERBOARD command as multi-message plain text ---
-    if message.content.strip() == "!rng.goof leaderboard":
+
+    # --- LEADERBOARD COMMAND ---
+    if content == "!rng.goof leaderboard":
         async with file_lock:
             stats = await load_stats()
         leaderboard = stats.get('leaderboard', [])
         if not leaderboard:
             await message.channel.send('??? no rolls 😔')
             return
-    
+
         header = "**RNG GOOF LEADERBOARD:**\n"
         footer = f"\nTotal Rolls: {stats.get('total_rolls', 0):,}"
         max_chars = 2000
-    
-        # Prepare all leaderboard lines
+
         lines = []
         for i, roll in enumerate(leaderboard[:10], 1):
             timestamp = int(roll['timestamp'])
             roll_name = roll['name']
             roll_rarity = int(roll['rarity'])
             display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-    
+
             line = (
                 f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
                 f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
             )
-    
-            # truncate extremely long lines
             if len(line) > 1000:
                 line = line[:997] + "…"
-    
             lines.append(line)
-    
-        # Combine lines into message chunks
+
         chunks = []
         current_chunk = header
         for line in lines:
-            # +2 for spacing
             if len(current_chunk) + len(line) + 2 > max_chars:
                 chunks.append(current_chunk.rstrip())
                 current_chunk = ""
             current_chunk += line + "\n\n"
-        # append footer to last chunk
         if current_chunk:
             current_chunk = current_chunk.rstrip() + footer
             chunks.append(current_chunk)
-    
-        # Send each chunk
-        try:
-            for chunk in chunks:
-                await message.channel.send(chunk)
-        except Exception as e:
-            await message.channel.send(f"Failed to send leaderboard: {e}")
-    
-    
-        # NORMAL ROLL
-        name, rarity = roll_item_once()
-        async with file_lock:
-            stats = await load_stats()
-            stats['total_rolls'] += 1
-            roll_number = stats['total_rolls']
-            timestamp_unix = int(datetime.utcnow().timestamp())
-            roll_data = {
-                'name': name,
-                'rarity': rarity,
-                'user': str(message.author),
-                'user_id': message.author.id,
-                'server': message.guild.name if message.guild else 'DM',
-                'timestamp': timestamp_unix,
-                'roll_number': roll_number
-            }
-            rank = update_leaderboard(stats, roll_data)
-            await save_stats(stats)
-    
-        display_name = f"**{name.upper()}**" if rarity >= 1000 else name
-        response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
-        if rank: response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-            
-        leaderboard = stats.get('leaderboard', [])
-        if rank and len(leaderboard) >= 10:
-            tenth_roll = leaderboard[-1]
-            rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
-            response += f"\n{rip_msg}"
-        await message.channel.send(response)
+
+        for chunk in chunks:
+            await message.channel.send(chunk)
+        return
+
+    # --- NORMAL ROLL (all other "!rng.goof " commands) ---
+    if not guild_id:
+        await message.channel.send("You can only roll in a server.")
+        return
+
+    async with file_lock:
+        roll_channels = await load_roll_channels()
+
+    if str(guild_id) not in roll_channels:
+        await message.channel.send("No channel set for rolls in this server. Use `!rng.goof setup` first.")
+        return
+
+    roll_channel_id = roll_channels[str(guild_id)]
+    if message.channel.id != roll_channel_id:
+        return
+
+    # --- COOLDOWN ---
+    now = asyncio.get_running_loop().time()
+    last_roll = cooldowns.get(message.author.id)
+    if last_roll and now - last_roll < COOLDOWN_SECONDS:
+        await message.channel.send(f"nrn bozo {message.author.mention}")
+        return
+    cooldowns[message.author.id] = now
+
+    # --- PERFORM ROLL ---
+    name, rarity = roll_item_once()
+    async with file_lock:
+        stats = await load_stats()
+        stats['total_rolls'] += 1
+        roll_number = stats['total_rolls']
+        timestamp_unix = int(datetime.utcnow().timestamp())
+        roll_data = {
+            'name': name,
+            'rarity': rarity,
+            'user': str(message.author),
+            'user_id': message.author.id,
+            'server': message.guild.name if message.guild else 'DM',
+            'timestamp': timestamp_unix,
+            'roll_number': roll_number
+        }
+        rank = update_leaderboard(stats, roll_data)
+        await save_stats(stats)
+
+    display_name = f"**{name.upper()}**" if rarity >= 1000 else name
+    response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
+    if rank:
+        response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
+        
+    leaderboard = stats.get('leaderboard', [])
+    if rank and len(leaderboard) >= 10:
+        tenth_roll = leaderboard[-1]
+        rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
+        response += f"\n{rip_msg}"
+
+    await message.channel.send(response)
 
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
@@ -380,6 +374,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
