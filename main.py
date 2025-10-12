@@ -339,32 +339,87 @@ async def on_message(message):
     # --- LEADERBOARD COMMAND ---
     if content.startswith("!rng.goof leaderboard"):
         async with file_lock:
+            # Determine type
             if content.endswith("top"):
                 stats = await load_stats()
-                leaderboard = stats.get('leaderboard', [])
-                if not leaderboard:
-                    await message.channel.send('??? no rolls 😔')
-                    return
-                leaderboard = sorted(leaderboard, key=lambda x: x['rarity'], reverse=True)
+                leaderboard = sorted(stats.get('leaderboard', []), key=lambda x: x['rarity'], reverse=True)
                 title = "RNG GOOF TOP 10 LEADERBOARD"
                 footer_text = f"Total Rolls: {stats.get('total_rolls', 0):,}"
-
             elif content.endswith("1000"):
                 top_1000 = await load_top_1000()
-                leaderboard = top_1000.get('leaderboard', [])
-                if not leaderboard:
-                    await message.channel.send('No rolls with rarity >= 1,000 yet 😔')
-                    return
-                leaderboard = sorted(leaderboard, key=lambda x: x['rarity'], reverse=True)
-                title = "RNG GOOF TOP 1000+ LEADERBOARD"
+                leaderboard = sorted(top_1000.get('leaderboard', []), key=lambda x: x['rarity'], reverse=True)
+                title = "RNG GOOF 1000+ RARITY LEADERBOARD"
                 footer_text = ""
             else:
                 await message.channel.send("Unknown leaderboard type. Use `top` or `1000`.")
                 return
-
-        # Build and send paginated embed (keep your existing code)
-        # ... existing leaderboard pagination code here ...
-        return  # Important: return after handling leaderboard
+    
+            if not leaderboard:
+                await message.channel.send("No rolls yet 😔")
+                return
+    
+            # --- Build paginated embed pages ---
+            page_size = 10
+            pages = []
+            for i in range(0, len(leaderboard), page_size):
+                chunk = leaderboard[i:i + page_size]
+                description = ""
+                for j, roll in enumerate(chunk, start=i + 1):
+                    timestamp = int(roll['timestamp'])
+                    roll_name = roll['name']
+                    roll_rarity = int(roll['rarity'])
+                    display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+                    description += (
+                        f"#{j} - {display_name} (1 in {roll_rarity:,})\n"
+                        f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}\n\n"
+                    )
+                embed = discord.Embed(
+                    title=title,
+                    description=description,
+                    color=discord.Color.gold()
+                )
+                embed.set_footer(text=f"{footer_text} | Page {i//page_size + 1}/{(len(leaderboard)-1)//page_size + 1}")
+                pages.append(embed)
+    
+            # Send first page
+            current_page = 0
+            leaderboard_msg = await message.channel.send(embed=pages[current_page])
+    
+            # --- Pagination Buttons ---
+            from discord.ui import Button, View
+    
+            prev_button = Button(label="⬅️ Prev", style=discord.ButtonStyle.primary)
+            next_button = Button(label="Next ➡️", style=discord.ButtonStyle.primary)
+    
+            async def prev_callback(interaction):
+                nonlocal current_page
+                current_page = (current_page - 1) % len(pages)
+                await leaderboard_msg.edit(embed=pages[current_page])
+                await interaction.response.defer()
+    
+            async def next_callback(interaction):
+                nonlocal current_page
+                current_page = (current_page + 1) % len(pages)
+                await leaderboard_msg.edit(embed=pages[current_page])
+                await interaction.response.defer()
+    
+            prev_button.callback = prev_callback
+            next_button.callback = next_callback
+    
+            view = View()
+            view.add_item(prev_button)
+            view.add_item(next_button)
+            await leaderboard_msg.edit(view=view)
+    
+            # Disable buttons after 2 minutes
+            async def disable_buttons():
+                await asyncio.sleep(120)
+                for item in view.children:
+                    item.disabled = True
+                await leaderboard_msg.edit(view=view)
+    
+            client.loop.create_task(disable_buttons())
+            return
 
     # --- ROLL ITEM (default) ---
     # Only happens if no other command matched
@@ -429,6 +484,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
