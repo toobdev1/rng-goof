@@ -91,10 +91,10 @@ modifiers = {
     "Celestial": (256, "🌌"),
     "Unusurpable": (512, "👑"),
     "Godlike": (1000, "⚡"),
-    "Otherworldly": (2500, "🌀")
-    "Starstruck": (4096, "🌠")
-    "Ubiquitous": (8192, "🔄")
-    "Eternal": (16384, "⏳")
+    "Otherworldly": (2500, "🌀"),
+    "Starstruck": (4096, "🌠"),
+    "Ubiquitous": (8192, "🔄"),
+    "Eternal": (16384, "⏳"),
     "Mega": (1000000, "💯")
 }
 
@@ -488,6 +488,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
