@@ -402,11 +402,11 @@ async def on_message(message):
             await save_top_1000(top_1000)
 
             all_rarities = sorted([r['rarity'] for r in top_1000.get('leaderboard', [])], reverse=True)
-            if all_rarities:
-                better_count = sum(1 for r in all_rarities if r > rarity)
-                percentile = 100 * better_count / len(all_rarities)
-                percentile_display = round(percentile)
-                response_percentile = f"\n-# This roll is in the top {percentile_display}% of 1000+ rarity rolls!"
+        if all_rarities:
+            better_count = sum(1 for r in all_rarities if r > rarity)
+            percentile = 100 * better_count / len(all_rarities)
+            percentile_display = round(percentile)
+            response_percentile = f"\n-# This roll is in the top {percentile_display}% of 1000+ rarity rolls!"
 
 
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
@@ -429,6 +429,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
