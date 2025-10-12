@@ -353,7 +353,7 @@ async def on_message(message):
 
         # Build leaderboard message
         header = "RNG GOOF 1000+ LEADERBOARD:**\n\n"
-        footer = f"\n-# Total Rolls: {stats.get('total_rolls', 0):,}"
+        footer = f"\n\n-# Total Rolls: {stats.get('total_rolls', 0):,}"
         if content.endswith("top"): header = "RNG GOOF TOP 10 LEADERBOARD:**\n"
         max_chars = 2000
         lines = []
@@ -463,6 +463,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
