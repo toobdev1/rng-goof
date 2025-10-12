@@ -197,7 +197,6 @@ async def load_top_1000():
             return top_1000
 
 # --- HELPER FUNCTIONS FOR TOP_1000 LEADERBOARD ---
-
 async def save_top_1000(top_1000, retry=1):
     sha = top_1000.pop('_sha', None)
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{TOP_1000_PATH}"
@@ -425,13 +424,24 @@ async def on_message(message):
         }
         rank = update_leaderboard(stats, roll_data)
         await save_stats(stats)
-
-        # Update top 1000 leaderboard if applicable
+    
+        response_percentile = ""
+        # --- Update top 1000 leaderboard if applicable ---
         if rarity >= 1000:
             top_1000 = await load_top_1000()
             update_top_1000_leaderboard(top_1000, roll_data)
             await save_top_1000(top_1000)
-
+    
+            # --- Fully dynamic percentile ---
+            all_rarities = sorted([r['rarity'] for r in top_1000.get('leaderboard', [])], reverse=True)
+            if all_rarities:
+                # Position of current roll among all 1000+ rolls
+                better_count = sum(1 for r in all_rarities if r > rarity)
+                percentile = 100 * better_count / len(all_rarities)
+                # Round to nearest integer for display
+                percentile_display = round(percentile)
+                response_percentile = f"\n🌟 This roll is in the top {100 - percentile_display}% of 1000+ rarity rolls!"
+    
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
@@ -441,7 +451,12 @@ async def on_message(message):
         tenth_roll = leaderboard[-1]
         rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
         response += f"\n{rip_msg}"
+    
+    # Append dynamic percentile if applicable
+    response += response_percentile
+    
     await message.channel.send(response)
+
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
     exit(1)
@@ -449,6 +464,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
