@@ -18,6 +18,7 @@ COOLDOWN_SECONDS = 2
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
 STATS_PATH = "stats.json"
+TOP_1000_PATH = "top_1000.json"
 ROLL_CHANNELS_PATH = "roll_channels.json"
 GITHUB_HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
@@ -179,6 +180,56 @@ async def save_roll_channels(roll_channels, retry=1):
                 return await save_roll_channels(new_channels, retry - 1)
             return False
 
+async def load_top_1000():
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{TOP_1000_PATH}"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=GITHUB_HEADERS) as resp:
+            text = await resp.text()
+            try:
+                data = json.loads(text)
+            except Exception:
+                return {}
+            if "message" in data and "content" not in data:
+                return {}
+            content = base64.b64decode(data["content"]).decode()
+            top_1000 = json.loads(content)
+            top_1000["_sha"] = data.get("sha", None)
+            return top_1000
+
+# --- HELPER FUNCTIONS FOR TOP_1000 LEADERBOARD ---
+
+async def save_top_1000(top_1000, retry=1):
+    sha = top_1000.pop('_sha', None)
+    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{TOP_1000_PATH}"
+    payload = {
+        "message": "Update top_1000 leaderboard",
+        "content": base64.b64encode(json.dumps(top_1000, indent=2).encode()).decode()
+    }
+    if sha:
+        payload["sha"] = sha
+    async with aiohttp.ClientSession() as session:
+        async with session.put(url, headers=GITHUB_HEADERS, json=payload) as resp:
+            text = await resp.text()
+            status = resp.status
+            if status in (200, 201):
+                data = json.loads(text)
+                top_1000["_sha"] = data["content"]["sha"]
+                return True
+            if status == 422 and retry > 0:
+                new_top = await load_top_1000()
+                new_top.update(top_1000)
+                return await save_top_1000(new_top, retry - 1)
+            return False
+
+def update_top_1000_leaderboard(top_1000, roll_data):
+    if roll_data['rarity'] < 1000:
+        return
+    leaderboard = top_1000.get('leaderboard', [])
+    leaderboard.append(roll_data)
+    leaderboard.sort(key=lambda x: x['rarity'], reverse=True)
+    top_1000['leaderboard'] = leaderboard[:10]
+    return leaderboard[:10]
+    
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
     leaderboard = stats.get('leaderboard', [])
@@ -247,12 +298,25 @@ async def on_message(message):
 
     guild_id = message.guild.id if message.guild else None
 
+    # --- HELP COMMAND ---
+    if content == "!rng.goof help":
+        help_text = (
+            "**RNG GOOF Bot Commands:**\n"
+            "`!rng.goof setup` - Set this channel as the roll channel.\n"
+            "`!rng.goof leaderboard top` - Show the top 10 all-time rolls.\n"
+            "`!rng.goof leaderboard 1000` - Show top 10 rolls with rarity ≥ 1,000.\n"
+            "`!rng.goof debug` - Show bot ID.\n"
+            "`!rng.goof` or `!rng.goof <anything>` - Roll an item (except the above exceptions).\n"
+            "`!rng.goof help` - Show this message."
+        )
+        await message.channel.send(help_text)
+        return
+
     # --- SETUP COMMAND ---
     if content == "!rng.goof setup":
         if not guild_id:
             await message.channel.send("You can only use this command in a server.")
             return
-
         async with file_lock:
             roll_channels = await load_roll_channels()
             roll_channels[str(guild_id)] = message.channel.id
@@ -269,25 +333,36 @@ async def on_message(message):
         return
 
     # --- LEADERBOARD COMMAND ---
-    if content == "!rng.goof leaderboard":
+    if content.startswith("!rng.goof leaderboard"):
         async with file_lock:
-            stats = await load_stats()
-        leaderboard = stats.get('leaderboard', [])
-        if not leaderboard:
-            await message.channel.send('??? no rolls 😔')
-            return
+            if content.endswith("top"):
+                stats = await load_stats()
+                leaderboard = stats.get('leaderboard', [])
+                if not leaderboard:
+                    await message.channel.send('??? no rolls 😔')
+                    return
+            elif content.endswith("1000"):
+                top_1000 = await load_top_1000()
+                leaderboard = top_1000.get('leaderboard', [])
+                if not leaderboard:
+                    await message.channel.send('No rolls with rarity >= 1,000 yet 😔')
+                    return
+            else:
+                await message.channel.send("Unknown leaderboard type. Use `top` or `1000`.")
+                return
 
+        # Build leaderboard message
         header = "**RNG GOOF LEADERBOARD:**\n"
-        footer = f"\nTotal Rolls: {stats.get('total_rolls', 0):,}"
+        footer = ""
+        if content.endswith("top"):
+            footer = f"\nTotal Rolls: {stats.get('total_rolls', 0):,}"
         max_chars = 2000
-
         lines = []
         for i, roll in enumerate(leaderboard[:10], 1):
             timestamp = int(roll['timestamp'])
             roll_name = roll['name']
             roll_rarity = int(roll['rarity'])
             display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-
             line = (
                 f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
                 f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
@@ -311,18 +386,15 @@ async def on_message(message):
             await message.channel.send(chunk)
         return
 
-    # --- NORMAL ROLL (all other "!rng.goof " commands) ---
+    # --- NORMAL ROLL ---
     if not guild_id:
         await message.channel.send("You can only roll in a server.")
         return
-
     async with file_lock:
         roll_channels = await load_roll_channels()
-
     if str(guild_id) not in roll_channels:
         await message.channel.send("No channel set for rolls in this server. Use `!rng.goof setup` first.")
         return
-
     roll_channel_id = roll_channels[str(guild_id)]
     if message.channel.id != roll_channel_id:
         return
@@ -335,7 +407,7 @@ async def on_message(message):
         return
     cooldowns[message.author.id] = now
 
-    # --- PERFORM ROLL ---
+    # --- ROLL ITEM ---
     name, rarity = roll_item_once()
     async with file_lock:
         stats = await load_stats()
@@ -354,19 +426,22 @@ async def on_message(message):
         rank = update_leaderboard(stats, roll_data)
         await save_stats(stats)
 
+        # Update top 1000 leaderboard if applicable
+        if rarity >= 1000:
+            top_1000 = await load_top_1000()
+            update_top_1000_leaderboard(top_1000, roll_data)
+            await save_top_1000(top_1000)
+
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
         response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-        
     leaderboard = stats.get('leaderboard', [])
     if rank and len(leaderboard) >= 10:
         tenth_roll = leaderboard[-1]
         rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
         response += f"\n{rip_msg}"
-
     await message.channel.send(response)
-
 # --- RUN BOT ---
 if not DISCORD_TOKEN:
     exit(1)
@@ -374,6 +449,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
