@@ -440,7 +440,7 @@ async def on_message(message):
                 percentile = 100 * better_count / len(all_rarities)
                 # Round to nearest integer for display
                 percentile_display = round(percentile)
-                response_percentile = f"\n🌟 This roll is in the top {100 - percentile_display}% of 1000+ rarity rolls!"
+                response_percentile = f"\n-# This roll is in the top {100 - percentile_display}% of 1000+ rarity rolls!"
     
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
@@ -464,6 +464,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
