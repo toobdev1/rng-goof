@@ -1,90 +1,94 @@
 {
-  "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
-  "rarity": 819200,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "hanako testing server",
-  "timestamp": 1759918920,
-  "roll_number": 49
-},
-{
-  "name": "\ud83c\udf40 \ud83c\udf36\ufe0f \ud83d\udc51 <:easy:1399359028701692005> Lucky Scorching Unusurpable Easy",
-  "rarity": 655360,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760004000,
-  "roll_number": 322
-},
-{
-  "name": "\ud83c\udf27\ufe0f \u2699\ufe0f \ud83c\udf36\ufe0f <:medium:1399359026558664744> Rainy Mechanical Scorching Medium",
-  "rarity": 204800,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760228040,
-  "roll_number": 1056
-},
-{
-  "name": "\ud83c\udf27\ufe0f \ud83d\udc51 <:difficult:1399359021114462211> Rainy Unusurpable Difficult",
-  "rarity": 131072,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "hanako testing server",
-  "timestamp": 1760178475,
-  "roll_number": 956
-},
-{
-  "name": "\ud83c\udf40\ud83d\udd25\u2b50\u2728 <:easy:1399359028701692005> Lucky Hot Super Shiny Easy",
-  "rarity": 40960,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "hanako testing server",
-  "timestamp": 1760088660,
-  "roll_number": 202
-},
-{
-  "name": "\u2699\ufe0f <:catastrophic:1399359005679419492> Mechanical Catastrophic",
-  "rarity": 40960,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760227712,
-  "roll_number": 1022
-},
-{
-  "name": "\ud83c\udf40 \u2753 <:challenging:1399359019172237343> Lucky Mystery Challenging",
-  "rarity": 25600,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760001788,
-  "roll_number": 249
-},
-{
-  "name": "\ud83c\udf40 \ud83c\udf27\ufe0f \ud83c\udf36\ufe0f <:easy:1399359028701692005> Lucky Rainy Scorching Easy",
-  "rarity": 20480,
-  "user": "caramelfenic",
-  "user_id": 786536500748746753,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760000315,
-  "roll_number": 175
-},
-{
-  "name": "\ud83c\udf40 \u2699\ufe0f \ud83e\uddca <:easy:1399359028701692005> Lucky Mechanical Frostbited Easy",
-  "rarity": 20480,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760004087,
-  "roll_number": 330
-},
-{
-  "name": "\ud83d\udd25 \ud83c\udf36\ufe0f <:difficult:1399359021114462211> Hot Scorching Difficult",
-  "rarity": 20480,
-  "user": "hexadec1m6l",
-  "user_id": 852902289270243388,
-  "server": "Goof's Tower of Doom",
-  "timestamp": 1760227716,
-  "roll_number": 1023
+  "leaderboard": {
+  {
+    "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
+    "rarity": 819200,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "hanako testing server",
+    "timestamp": 1759918920,
+    "roll_number": 49
+  },
+  {
+    "name": "\ud83c\udf40 \ud83c\udf36\ufe0f \ud83d\udc51 <:easy:1399359028701692005> Lucky Scorching Unusurpable Easy",
+    "rarity": 655360,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760004000,
+    "roll_number": 322
+  },
+  {
+    "name": "\ud83c\udf27\ufe0f \u2699\ufe0f \ud83c\udf36\ufe0f <:medium:1399359026558664744> Rainy Mechanical Scorching Medium",
+    "rarity": 204800,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760228040,
+    "roll_number": 1056
+  },
+  {
+    "name": "\ud83c\udf27\ufe0f \ud83d\udc51 <:difficult:1399359021114462211> Rainy Unusurpable Difficult",
+    "rarity": 131072,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "hanako testing server",
+    "timestamp": 1760178475,
+    "roll_number": 956
+  },
+  {
+    "name": "\ud83c\udf40\ud83d\udd25\u2b50\u2728 <:easy:1399359028701692005> Lucky Hot Super Shiny Easy",
+    "rarity": 40960,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "hanako testing server",
+    "timestamp": 1760088660,
+    "roll_number": 202
+  },
+  {
+    "name": "\u2699\ufe0f <:catastrophic:1399359005679419492> Mechanical Catastrophic",
+    "rarity": 40960,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760227712,
+    "roll_number": 1022
+  },
+  {
+    "name": "\ud83c\udf40 \u2753 <:challenging:1399359019172237343> Lucky Mystery Challenging",
+    "rarity": 25600,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760001788,
+    "roll_number": 249
+  },
+  {
+    "name": "\ud83c\udf40 \ud83c\udf27\ufe0f \ud83c\udf36\ufe0f <:easy:1399359028701692005> Lucky Rainy Scorching Easy",
+    "rarity": 20480,
+    "user": "caramelfenic",
+    "user_id": 786536500748746753,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760000315,
+    "roll_number": 175
+  },
+  {
+    "name": "\ud83c\udf40 \u2699\ufe0f \ud83e\uddca <:easy:1399359028701692005> Lucky Mechanical Frostbited Easy",
+    "rarity": 20480,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760004087,
+    "roll_number": 330
+  },
+  {
+    "name": "\ud83d\udd25 \ud83c\udf36\ufe0f <:difficult:1399359021114462211> Hot Scorching Difficult",
+    "rarity": 20480,
+    "user": "hexadec1m6l",
+    "user_id": 852902289270243388,
+    "server": "Goof's Tower of Doom",
+    "timestamp": 1760227716,
+    "roll_number": 1023
+  }
+}
 }
