@@ -301,10 +301,11 @@ async def on_message(message):
     if content == "!rng.goof help":
         help_text = (
             "**RNG GOOF Bot Commands:**\n"
+            "\n"
             "`!rng.goof setup` - Set this channel as the roll channel.\n"
             "`!rng.goof leaderboard top` - Show the top 10 all-time rolls.\n"
             "`!rng.goof leaderboard 1000` - Show top 10 rolls with rarity ≥ 1,000.\n"
-            "`!rng.goof debug` - Show bot ID.\n"
+            "`!rng.goof debug` - ???\n"
             "`!rng.goof` or `!rng.goof <anything>` - Roll an item (except the above exceptions).\n"
             "`!rng.goof help` - Show this message."
         )
@@ -351,11 +352,9 @@ async def on_message(message):
                 return
 
         # Build leaderboard message
-        header = "RNG GOOF 1000+ LEADERBOARD:**\n "
-        footer = ""
-        if content.endswith("top"):  
-            footer = f"\n-# Total Rolls: {stats.get('total_rolls', 0):,}"
-            header = "RNG GOOF TOP 10 LEADERBOARD:**\n "
+        header = "RNG GOOF 1000+ LEADERBOARD:**\n\n"
+        footer = f"\n-# Total Rolls: {stats.get('total_rolls', 0):,}"
+        if content.endswith("top"): header = "RNG GOOF TOP 10 LEADERBOARD:**\n"
         max_chars = 2000
         lines = []
         for i, roll in enumerate(leaderboard[:10], 1):
@@ -367,8 +366,7 @@ async def on_message(message):
                 f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
                 f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
             )
-            if len(line) > 1000:
-                line = line[:997] + "…"
+            if len(line) > 1000: line = line[:997] + "…"
             lines.append(line)
 
         chunks = []
@@ -465,6 +463,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
