@@ -356,23 +356,28 @@ async def on_message(message):
                 return
 
         # Build leaderboard message
-        header = "RNG GOOF 1000+ LEADERBOARD:**\n\n"
-        footer = f"\n\n-# Total Rolls: {stats.get('total_rolls', 0):,}"
-        if content.endswith("top"): header = "RNG GOOF TOP 10 LEADERBOARD:**\n"
+        header = "**RNG GOOF TOP 10 LEADERBOARD:**\n\n"
+        footer = f"\n-# Total Rolls: {stats.get('total_rolls', 0):,}"
         max_chars = 2000
         lines = []
+        
         for i, roll in enumerate(leaderboard[:10], 1):
             timestamp = int(roll['timestamp'])
             roll_name = roll['name']
             roll_rarity = int(roll['rarity'])
+            
+            # Only bold the item name if rarity >= 1000
             display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+            
             line = (
                 f"#{i} - {display_name} (1 in {roll_rarity:,})\n"
                 f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}"
             )
-            if len(line) > 1000: line = line[:997] + "…"
+            if len(line) > 1000:
+                line = line[:997] + "…"
             lines.append(line)
-
+        
+        # Chunking for Discord message limit
         chunks = []
         current_chunk = header
         for line in lines:
@@ -383,10 +388,10 @@ async def on_message(message):
         if current_chunk:
             current_chunk = current_chunk.rstrip() + footer
             chunks.append(current_chunk)
-
+        
         for chunk in chunks:
             await message.channel.send(chunk)
-        return
+
 
     # --- NORMAL ROLL ---
     if not guild_id:
@@ -467,6 +472,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
