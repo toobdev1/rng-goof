@@ -226,7 +226,7 @@ def update_top_1000_leaderboard(top_1000, roll_data):
     leaderboard = top_1000.get('leaderboard', [])
     leaderboard.append(roll_data)
     leaderboard.sort(key=lambda x: x['rarity'], reverse=True)
-    return leaderboard
+    top_1000['leaderboard'] = leaderboard
     
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
@@ -408,6 +408,7 @@ async def on_message(message):
                 percentile_display = round(percentile)
                 response_percentile = f"\n-# This roll is in the top {percentile_display}% of 1000+ rarity rolls!"
 
+
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
@@ -428,6 +429,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
