@@ -317,6 +317,10 @@ async def on_message(message):
         if not guild_id:
             await message.channel.send("You can only use this command in a server.")
             return
+            
+        perms = message.author.guild_permissions
+        if not (perms.manage_channels or perms.administrator): return
+            
         async with file_lock:
             roll_channels = await load_roll_channels()
             roll_channels[str(guild_id)] = message.channel.id
@@ -463,6 +467,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
