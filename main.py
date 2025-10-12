@@ -226,8 +226,7 @@ def update_top_1000_leaderboard(top_1000, roll_data):
     leaderboard = top_1000.get('leaderboard', [])
     leaderboard.append(roll_data)
     leaderboard.sort(key=lambda x: x['rarity'], reverse=True)
-    top_1000['leaderboard'] = leaderboard[:10]
-    return leaderboard[:10]
+    return leaderboard
     
 # --- LEADERBOARD HELPERS ---
 def update_leaderboard(stats, roll_data):
@@ -530,6 +529,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
