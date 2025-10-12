@@ -347,34 +347,9 @@ async def on_message(message):
                     await message.channel.send('??? no rolls 😔')
                     return
     
-                # Sort descending by rarity
                 leaderboard = sorted(leaderboard, key=lambda x: x['rarity'], reverse=True)
-    
                 title = "RNG GOOF TOP 10 LEADERBOARD"
                 footer_text = f"Total Rolls: {stats.get('total_rolls', 0):,}"
-                page_size = 10
-                pages = []
-    
-                # Build pages
-                for i in range(0, len(leaderboard), page_size):
-                    chunk = leaderboard[i:i + page_size]
-                    description = ""
-                    for j, roll in enumerate(chunk, start=i + 1):
-                        timestamp = int(roll['timestamp'])
-                        roll_name = roll['name']
-                        roll_rarity = int(roll['rarity'])
-                        display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-                        description += (
-                            f"#{j} - {display_name} (1 in {roll_rarity:,})\n"
-                            f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}\n\n"
-                        )
-                    embed = discord.Embed(
-                        title=title,
-                        description=description,
-                        color=discord.Color.gold()
-                    )
-                    embed.set_footer(text=f"{footer_text} | Page {i//page_size + 1}/{(len(leaderboard)-1)//page_size + 1}")
-                    pages.append(embed)
     
             elif content.endswith("1000"):
                 top_1000 = await load_top_1000()
@@ -383,85 +358,78 @@ async def on_message(message):
                     await message.channel.send('No rolls with rarity >= 1,000 yet 😔')
                     return
     
-                # Sort descending by rarity
                 leaderboard = sorted(leaderboard, key=lambda x: x['rarity'], reverse=True)
-    
                 title = "RNG GOOF TOP 1000+ LEADERBOARD"
                 footer_text = ""
-                page_size = 10
-                pages = []
-    
-                for i in range(0, len(leaderboard), page_size):
-                    chunk = leaderboard[i:i + page_size]
-                    description = ""
-                    for j, roll in enumerate(chunk, start=i + 1):
-                        timestamp = int(roll['timestamp'])
-                        roll_name = roll['name']
-                        roll_rarity = int(roll['rarity'])
-                        display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
-                        description += (
-                            f"#{j} - {display_name} (1 in {roll_rarity:,})\n"
-                            f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}\n\n"
-                        )
-                    embed = discord.Embed(
-                        title=title,
-                        description=description,
-                        color=discord.Color.gold()
-                    )
-                    embed.set_footer(text=f"{footer_text} | Page {i//page_size + 1}/{(len(leaderboard)-1)//page_size + 1}")
-                    pages.append(embed)
     
             else:
                 await message.channel.send("Unknown leaderboard type. Use `top` or `1000`.")
                 return
     
-        # --- Send paginated embed ---
+        # Build embed pages
+        page_size = 10
+        pages = []
+        for i in range(0, len(leaderboard), page_size):
+            chunk = leaderboard[i:i + page_size]
+            description = ""
+            for j, roll in enumerate(chunk, start=i + 1):
+                timestamp = int(roll['timestamp'])
+                roll_name = roll['name']
+                roll_rarity = int(roll['rarity'])
+                display_name = f"**{roll_name.upper()}**" if roll_rarity >= 1000 else roll_name
+                description += (
+                    f"#{j} - {display_name} (1 in {roll_rarity:,})\n"
+                    f"Rolled by {roll['user']} at <t:{timestamp}> in {roll['server']} / All-Time Roll #{roll['roll_number']:,}\n\n"
+                )
+            embed = discord.Embed(
+                title=title,
+                description=description,
+                color=discord.Color.gold()
+            )
+            embed.set_footer(text=f"{footer_text} | Page {i//page_size + 1}/{(len(leaderboard)-1)//page_size + 1}")
+            pages.append(embed)
+    
         if not pages:
             await message.channel.send("No entries to display.")
             return
     
+        # --- BUTTONS FOR PAGINATION ---
+        from discord.ui import Button, View
+    
         current_page = 0
         leaderboard_msg = await message.channel.send(embed=pages[current_page])
     
-        # Add reaction buttons for navigation
-        await leaderboard_msg.add_reaction("⬅️")
-        await leaderboard_msg.add_reaction("➡️")
+        prev_button = Button(label="⬅️ Prev", style=discord.ButtonStyle.primary)
+        next_button = Button(label="Next ➡️", style=discord.ButtonStyle.primary)
     
-        def check(reaction, user):
-            return (
-                user == message.author
-                and str(reaction.emoji) in ["⬅️", "➡️"]
-                and reaction.message.id == leaderboard_msg.id
-            )
+        async def prev_callback(interaction):
+            nonlocal current_page
+            current_page = (current_page - 1) % len(pages)
+            await leaderboard_msg.edit(embed=pages[current_page])
+            await interaction.response.defer()
     
-        while True:
-            try:
-                reaction, user = await client.wait_for('reaction_add', timeout=120.0, check=check)
-            except asyncio.TimeoutError:
-                await leaderboard_msg.clear_reactions()
-                break
+        async def next_callback(interaction):
+            nonlocal current_page
+            current_page = (current_page + 1) % len(pages)
+            await leaderboard_msg.edit(embed=pages[current_page])
+            await interaction.response.defer()
     
-            if str(reaction.emoji) == "➡️":
-                current_page = (current_page + 1) % len(pages)
-                await leaderboard_msg.edit(embed=pages[current_page])
-            elif str(reaction.emoji) == "⬅️":
-                current_page = (current_page - 1) % len(pages)
-                await leaderboard_msg.edit(embed=pages[current_page])
+        prev_button.callback = prev_callback
+        next_button.callback = next_callback
     
-            await leaderboard_msg.remove_reaction(reaction.emoji, user)
-            
-        # --- NORMAL ROLL ---
-        if not guild_id:
-            await message.channel.send("You can only roll in a server.")
-            return
-        async with file_lock:
-            roll_channels = await load_roll_channels()
-        if str(guild_id) not in roll_channels:
-            await message.channel.send("No channel set for rolls in this server. Use `!rng.goof setup` first.")
-            return
-        roll_channel_id = roll_channels[str(guild_id)]
-        if message.channel.id != roll_channel_id:
-            return
+        view = View()
+        view.add_item(prev_button)
+        view.add_item(next_button)
+        await leaderboard_msg.edit(view=view)
+    
+        # Disable buttons after 2 minutes
+        async def disable_buttons():
+            await asyncio.sleep(120)
+            for item in view.children:
+                item.disabled = True
+            await leaderboard_msg.edit(view=view)
+    
+        client.loop.create_task(disable_buttons())
 
     # --- COOLDOWN ---
     now = asyncio.get_running_loop().time()
@@ -529,6 +497,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
