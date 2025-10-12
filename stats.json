@@ -1,5 +1,5 @@
 {
-  "total_rolls": 1333,
+  "total_rolls": 1334,
   "leaderboard": [
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
@@ -18,6 +18,15 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1760004000,
       "roll_number": 322
+    },
+    {
+      "name": "\ud83c\udf27\ufe0f \ud83d\udd29 \ud83c\udf19 <:medium:1399359026558664744> Rainy Metallic Lunar Medium",
+      "rarity": 294912,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760245798,
+      "roll_number": 1334
     },
     {
       "name": "\ud83c\udf27\ufe0f \u2699\ufe0f \ud83c\udf36\ufe0f <:medium:1399359026558664744> Rainy Mechanical Scorching Medium",
@@ -81,15 +90,6 @@
       "server": "Goof's Tower of Doom",
       "timestamp": 1760227712,
       "roll_number": 1022
-    },
-    {
-      "name": "\ud83c\udf40 \u2753 <:challenging:1399359019172237343> Lucky Mystery Challenging",
-      "rarity": 25600,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1760001788,
-      "roll_number": 249
     }
   ]
 }
