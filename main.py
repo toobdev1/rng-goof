@@ -90,8 +90,12 @@ modifiers = {
     "Mystery": (200, "❓"),
     "Celestial": (256, "🌌"),
     "Unusurpable": (512, "👑"),
-    "GODLIKE": (1000, "⚡"),
+    "Godlike": (1000, "⚡"),
     "Otherworldly": (2500, "🌀")
+    "Starstruck": (4096, "🌠")
+    "Ubiquitous": (8192, "🔄")
+    "Eternal": (16384, "⏳")
+    "Mega": (1000000, "💯")
 }
 
 # --- GITHUB STATS FUNCTIONS ---
@@ -484,6 +488,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
