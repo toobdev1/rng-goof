@@ -247,37 +247,46 @@ def update_leaderboard(stats, roll_data):
 
 # --- ITEM ROLL ---
 def roll_item_once():
-    roll_value = random.random()
-    selected_rarity = None
-    selected_chance = None
-    sorted_rarities = sorted(rarities.items(), key=lambda x: x[1][0], reverse=True)
-    for name, (val, emoji) in sorted_rarities:
-        chance = 1 / val
-        if roll_value < chance:
-            selected_rarity = name
-            selected_chance = val
-            break
-    if selected_rarity is None:
-        selected_rarity, selected_chance = "Easy", rarities["Easy"][0]
+    items = list(rarities.items())  # (name, (val, emoji))
+    weights = [1.0 / v[0] for _, v in items]
+    total_weight = sum(weights)
+    if total_weight <= 0:
+        selected_rarity = "Easy"
+        selected_chance = rarities["Easy"][0]
+    else:
+        r = random.random() * total_weight
+        acc = 0.0
+        selected_rarity = None
+        selected_chance = None
+        for (name, (val, emoji)), w in zip(items, weights):
+            acc += w
+            if r <= acc:
+                selected_rarity = name
+                selected_chance = val
+                break
+        if selected_rarity is None:
+            selected_rarity, selected_chance = "Easy", rarities["Easy"][0]
 
     active_mods = []
     for mod_name, (val, emoji) in modifiers.items():
         if mod_name == "Normal":
             continue
-        if random.random() < (1 / val):
+        if random.random() < (1.0 / val):
             active_mods.append(mod_name)
-
+            
     total_multiplier = 1
     for mod in active_mods:
         total_multiplier *= modifiers[mod][0]
 
-    total_rarity = selected_chance * total_multiplier
+    total_rarity = int(selected_chance * total_multiplier)
     emojis = [modifiers[m][1] for m in sorted(active_mods, key=lambda m: modifiers[m][0])]
     emojis.append(rarities[selected_rarity][1])
     emoji_string = " ".join(e for e in emojis if e)
+
     text_parts = active_mods + [selected_rarity]
     text_string = " ".join(text_parts)
     display_name = f"{emoji_string} {text_string}".strip()
+
     return display_name, total_rarity
 
 # --- DISCORD BOT ---
@@ -488,6 +497,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
