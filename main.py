@@ -9,6 +9,7 @@ import aiohttp
 import json
 import base64
 from random import randint
+from discord.ui import Button, View
 
 # --- CONFIG ---
 DISCORD_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
@@ -397,41 +398,40 @@ async def on_message(message):
             # Send first page
             current_page = 0
             leaderboard_msg = await message.channel.send(embed=pages[current_page])
-    
-            # --- Pagination Buttons ---
-            from discord.ui import Button, View
-    
-            prev_button = Button(label="⬅️ Prev", style=discord.ButtonStyle.primary)
-            next_button = Button(label="Next ➡️", style=discord.ButtonStyle.primary)
-    
-            async def prev_callback(interaction):
-                nonlocal current_page
-                current_page = (current_page - 1) % len(pages)
-                await leaderboard_msg.edit(embed=pages[current_page])
-                await interaction.response.defer()
-    
-            async def next_callback(interaction):
-                nonlocal current_page
-                current_page = (current_page + 1) % len(pages)
-                await leaderboard_msg.edit(embed=pages[current_page])
-                await interaction.response.defer()
-    
-            prev_button.callback = prev_callback
-            next_button.callback = next_callback
-    
-            view = View()
-            view.add_item(prev_button)
-            view.add_item(next_button)
-            await leaderboard_msg.edit(view=view)
-    
-            # Disable buttons after 2 minutes
-            async def disable_buttons():
-                await asyncio.sleep(120)
-                for item in view.children:
-                    item.disabled = True
+            
+            if content.endswith("1000"):
+                prev_button = Button(label="⬅️ Prev", style=discord.ButtonStyle.primary)
+                next_button = Button(label="Next ➡️", style=discord.ButtonStyle.primary)
+                
+                async def prev_callback(interaction):
+                    nonlocal current_page
+                    current_page = (current_page - 1) % len(pages)
+                    await leaderboard_msg.edit(embed=pages[current_page])
+                    await interaction.response.defer()
+                
+                async def next_callback(interaction):
+                    nonlocal current_page
+                    current_page = (current_page + 1) % len(pages)
+                    await leaderboard_msg.edit(embed=pages[current_page])
+                    await interaction.response.defer()
+                
+                prev_button.callback = prev_callback
+                next_button.callback = next_callback
+                
+                view = View()
+                view.add_item(prev_button)
+                view.add_item(next_button)
                 await leaderboard_msg.edit(view=view)
-    
-            client.loop.create_task(disable_buttons())
+                
+                # Disable buttons after 2 minutes
+                async def disable_buttons():
+                    await asyncio.sleep(120)
+                    for item in view.children:
+                        item.disabled = True
+                    await leaderboard_msg.edit(view=view)
+                
+                client.loop.create_task(disable_buttons())
+                
             return
 
     # --- ROLL ITEM (default) ---
@@ -497,6 +497,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
