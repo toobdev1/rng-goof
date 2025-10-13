@@ -1,6 +1,15 @@
 {
-  "total_rolls": 1554,
+  "total_rolls": 1555,
   "leaderboard": [
+    {
+      "name": "\ud83c\udf0c \ud83c\udf20 <:easy:1399359028701692005> Celestial Starstruck Easy",
+      "rarity": 2097152,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Tower of Doom",
+      "timestamp": 1760347270,
+      "roll_number": 1555
+    },
     {
       "name": "\u2699\u2b50\ud83c\udf36 <:medium:1399359026558664744> Mechanical Super Scorching Medium",
       "rarity": 819200,
@@ -81,15 +90,6 @@
       "server": "hanako testing server",
       "timestamp": 1760088660,
       "roll_number": 202
-    },
-    {
-      "name": "\u2699\ufe0f <:catastrophic:1399359005679419492> Mechanical Catastrophic",
-      "rarity": 40960,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Tower of Doom",
-      "timestamp": 1760227712,
-      "roll_number": 1022
     }
   ]
 }
