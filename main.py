@@ -411,8 +411,8 @@ async def on_message(message):
             if content.endswith("1000"):
                 prev_button = Button(label="⬅️ Prev", style=discord.ButtonStyle.primary)
                 next_button = Button(label="Next ➡️", style=discord.ButtonStyle.primary)
-                jump_page_button = Button(label="🔢 Jump to Page", style=discord.ButtonStyle.secondary)
-                jump_roll_button = Button(label="🎲 Jump to Roll", style=discord.ButtonStyle.secondary)
+                jump_page_button = Button(label="Jump to Page", style=discord.ButtonStyle.secondary)
+                jump_rank_button = Button(label="Jump to Rank", style=discord.ButtonStyle.secondary)
             
                 async def prev_callback(interaction):
                     nonlocal current_page
@@ -445,37 +445,37 @@ async def on_message(message):
                     except (ValueError, asyncio.TimeoutError):
                         await interaction.followup.send("Cancelled or invalid input.", ephemeral=True)
             
-                async def jump_roll_callback(interaction):
+                async def jump_rank_callback(interaction):
                     nonlocal current_page
-                    await interaction.response.send_message("Enter roll number (#):", ephemeral=True)
+                    await interaction.response.send_message("Enter rank number (#):", ephemeral=True)
             
                     def check(m):
                         return m.author == interaction.user and m.channel == interaction.channel
             
                     try:
                         msg = await client.wait_for("message", check=check, timeout=30)
-                        roll_num = int(msg.content.strip())
-                        index = next((i for i, r in enumerate(leaderboard) if r["roll_number"] == roll_num), None)
-                        if index is None:
-                            await interaction.followup.send("Roll not found.", ephemeral=True)
-                            return
-                        current_page = index // page_size
-                        await leaderboard_msg.edit(embed=pages[current_page])
-                        await msg.delete()
-                        await interaction.followup.send(f"Jumped to page {current_page + 1}.", ephemeral=True)
+                        rank_num = int(msg.content.strip())
+                        if 1 <= rank_num <= len(leaderboard):
+                            index = rank_num - 1
+                            current_page = index // page_size
+                            await leaderboard_msg.edit(embed=pages[current_page])
+                            await msg.delete()
+                            await interaction.followup.send(f"Jumped to rank #{rank_num} (page {current_page + 1}).", ephemeral=True)
+                        else:
+                            await interaction.followup.send("Invalid rank number.", ephemeral=True)
                     except (ValueError, asyncio.TimeoutError):
                         await interaction.followup.send("Cancelled or invalid input.", ephemeral=True)
             
                 prev_button.callback = prev_callback
                 next_button.callback = next_callback
                 jump_page_button.callback = jump_page_callback
-                jump_roll_button.callback = jump_roll_callback
+                jump_rank_button.callback = jump_rank_callback
             
                 view = View()
                 view.add_item(prev_button)
                 view.add_item(next_button)
                 view.add_item(jump_page_button)
-                view.add_item(jump_roll_button)
+                view.add_item(jump_rank_button)
                 await leaderboard_msg.edit(view=view)
             
                 async def disable_buttons():
@@ -485,8 +485,6 @@ async def on_message(message):
                     await leaderboard_msg.edit(view=view)
             
                 client.loop.create_task(disable_buttons())
-
-                
             return
 
     # --- ROLL ITEM (default) ---
@@ -528,13 +526,13 @@ async def on_message(message):
                 better_count = sum(1 for r in all_rarities if r > rarity)
                 percentile = 100 * better_count / len(all_rarities)
                 percentile_display = round(percentile)
-                response_percentile = f"\n-# This roll is in the top {percentile_display}% (#{better_count + 1}) of 1000+ rarity rolls!"
+                response_percentile = f"\n-# This roll is good for top {percentile_display}% (#{better_count + 1}) of 1000+ rarity rolls"
 
 
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
-        response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
+        response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard**'
 
     response += response_percentile
     await message.channel.send(response)
@@ -546,6 +544,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
