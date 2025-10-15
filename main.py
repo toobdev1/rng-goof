@@ -474,18 +474,13 @@ async def on_message(message):
                 better_count = sum(1 for r in all_rarities if r > rarity)
                 percentile = 100 * better_count / len(all_rarities)
                 percentile_display = round(percentile)
-                response_percentile = f"\n-# This roll is in the top {percentile_display}% of 1000+ rarity rolls!"
+                response_percentile = f"\n-# This roll is in the top {percentile_display}% (#{better_count + 1}) of 1000+ rarity rolls!"
 
 
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
     if rank:
         response += f'\n**This roll is good for #{rank} on the RNG GOOF leaderboard!**'
-    leaderboard = stats.get('leaderboard', [])
-    if rank and len(leaderboard) >= 10:
-        tenth_roll = leaderboard[-1]
-        rip_msg = f"rip {tenth_roll['name']} (1 in {int(tenth_roll['rarity']):,})"
-        response += f"\n{rip_msg}"
 
     response += response_percentile
     await message.channel.send(response)
@@ -497,6 +492,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
