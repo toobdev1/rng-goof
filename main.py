@@ -82,7 +82,7 @@ modifiers = {
     "Rainy": (16, "🌧️"),
     "Mechanical": (20, "⚙️"),
     "Cold": (25, "❄️"),
-    "Floral: (32, "🌸"),
+    "Floral": (32, "🌸"),
     "Metallic": (48, "🔩"),
     "Super": (64, "⭐"),
     "Lunar": (96, "🌙"),
@@ -546,6 +546,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
