@@ -82,6 +82,7 @@ modifiers = {
     "Rainy": (16, "🌧️"),
     "Mechanical": (20, "⚙️"),
     "Cold": (25, "❄️"),
+    "Floral: (32, "🌸"),
     "Metallic": (48, "🔩"),
     "Super": (64, "⭐"),
     "Lunar": (96, "🌙"),
@@ -90,10 +91,18 @@ modifiers = {
     "Scorching": (160, "🌶️"),
     "Mystery": (200, "❓"),
     "Celestial": (256, "🌌"),
+    "Vernal": (321, "🍃"),
+    "Biohazardous": (404, "☣️"),
     "Unusurpable": (512, "👑"),
+    "Fortunate": (777, "🥠"), 
     "Godlike": (1000, "⚡"),
+    "Sparkling": (1024, "🎇"),
+    "Meteoric": (2048, "☄️"),
+    "Static": (2400, "📺"),
+    "Radioactive": (2911, "☢️"),
     "Otherworldly": (2500, "🌀"),
     "Starstruck": (4096, "🌠"),
+    "Lavish": (7777, "💰"),
     "Ubiquitous": (8192, "🔄"),
     "Eternal": (16384, "⏳"),
     "Mega": (1000000, "💯")
@@ -402,40 +411,85 @@ async def on_message(message):
             if content.endswith("1000"):
                 prev_button = Button(label="⬅️ Prev", style=discord.ButtonStyle.primary)
                 next_button = Button(label="Next ➡️", style=discord.ButtonStyle.primary)
-                
+                jump_page_button = Button(label="🔢 Jump to Page", style=discord.ButtonStyle.secondary)
+                jump_roll_button = Button(label="🎲 Jump to Roll", style=discord.ButtonStyle.secondary)
+            
                 async def prev_callback(interaction):
                     nonlocal current_page
                     current_page = (current_page - 1) % len(pages)
                     await leaderboard_msg.edit(embed=pages[current_page])
                     await interaction.response.defer()
-                
+            
                 async def next_callback(interaction):
                     nonlocal current_page
                     current_page = (current_page + 1) % len(pages)
                     await leaderboard_msg.edit(embed=pages[current_page])
                     await interaction.response.defer()
-                
+            
+                async def jump_page_callback(interaction):
+                    nonlocal current_page
+                    await interaction.response.send_message("Enter page number:", ephemeral=True)
+            
+                    def check(m):
+                        return m.author == interaction.user and m.channel == interaction.channel
+            
+                    try:
+                        msg = await client.wait_for("message", check=check, timeout=30)
+                        page_num = int(msg.content.strip())
+                        if 1 <= page_num <= len(pages):
+                            current_page = page_num - 1
+                            await leaderboard_msg.edit(embed=pages[current_page])
+                            await msg.delete()
+                        else:
+                            await interaction.followup.send("Invalid page number.", ephemeral=True)
+                    except (ValueError, asyncio.TimeoutError):
+                        await interaction.followup.send("Cancelled or invalid input.", ephemeral=True)
+            
+                async def jump_roll_callback(interaction):
+                    nonlocal current_page
+                    await interaction.response.send_message("Enter roll number (#):", ephemeral=True)
+            
+                    def check(m):
+                        return m.author == interaction.user and m.channel == interaction.channel
+            
+                    try:
+                        msg = await client.wait_for("message", check=check, timeout=30)
+                        roll_num = int(msg.content.strip())
+                        index = next((i for i, r in enumerate(leaderboard) if r["roll_number"] == roll_num), None)
+                        if index is None:
+                            await interaction.followup.send("Roll not found.", ephemeral=True)
+                            return
+                        current_page = index // page_size
+                        await leaderboard_msg.edit(embed=pages[current_page])
+                        await msg.delete()
+                        await interaction.followup.send(f"Jumped to page {current_page + 1}.", ephemeral=True)
+                    except (ValueError, asyncio.TimeoutError):
+                        await interaction.followup.send("Cancelled or invalid input.", ephemeral=True)
+            
                 prev_button.callback = prev_callback
                 next_button.callback = next_callback
-                
+                jump_page_button.callback = jump_page_callback
+                jump_roll_button.callback = jump_roll_callback
+            
                 view = View()
                 view.add_item(prev_button)
                 view.add_item(next_button)
+                view.add_item(jump_page_button)
+                view.add_item(jump_roll_button)
                 await leaderboard_msg.edit(view=view)
-                
-                # Disable buttons after 2 minutes
+            
                 async def disable_buttons():
                     await asyncio.sleep(120)
                     for item in view.children:
                         item.disabled = True
                     await leaderboard_msg.edit(view=view)
-                
+            
                 client.loop.create_task(disable_buttons())
+
                 
             return
 
     # --- ROLL ITEM (default) ---
-    # Only happens if no other command matched
     now = asyncio.get_running_loop().time()
     last_roll = cooldowns.get(message.author.id)
     if last_roll and now - last_roll < COOLDOWN_SECONDS:
@@ -492,6 +546,7 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
 
 
