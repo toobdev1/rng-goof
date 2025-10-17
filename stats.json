@@ -1,5 +1,5 @@
 {
-  "total_rolls": 1910,
+  "total_rolls": 1911,
   "leaderboard": [
     {
       "name": "\ud83c\udf0c \ud83c\udf20 <:easy:1399359028701692005> Celestial Starstruck Easy",
@@ -83,13 +83,13 @@
       "roll_number": 1163
     },
     {
-      "name": "\ud83c\udf40\ud83d\udd25\u2b50\u2728 <:easy:1399359028701692005> Lucky Hot Super Shiny Easy",
-      "rarity": 40960,
+      "name": "\ud83c\udf40 \u2744\ufe0f \ud83c\udf0c <:easy:1399359028701692005> Lucky Cold Celestial Easy",
+      "rarity": 51200,
       "user": "hexadec1m6l",
       "user_id": 852902289270243388,
-      "server": "hanako testing server",
-      "timestamp": 1760088660,
-      "roll_number": 202
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1760699203,
+      "roll_number": 1911
     }
   ]
 }
