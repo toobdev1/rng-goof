@@ -99,8 +99,8 @@ modifiers = {
     "Sparkling": (1024, "🎇"),
     "Meteoric": (2048, "☄️"),
     "Static": (2400, "📺"),
-    "Radioactive": (2911, "☢️"),
     "Otherworldly": (2500, "🌀"),
+    "Radioactive": (2911, "☢️"),
     "Starstruck": (4096, "🌠"),
     "Lavish": (7777, "💰"),
     "Ubiquitous": (8192, "🔄"),
@@ -526,7 +526,7 @@ async def on_message(message):
                 better_count = sum(1 for r in all_rarities if r >= rarity)
                 percentile = 100 * better_count / len(all_rarities)
                 percentile_display = round(percentile)
-                response_percentile = f"\n-# This roll is good for top {percentile_display}% (#{better_count + 1}) of 1000+ rarity rolls"
+                response_percentile = f"\n-# This roll is good for top {percentile_display}% (#{better_count}) of 1000+ rarity rolls"
 
 
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
@@ -544,4 +544,5 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
+
 
