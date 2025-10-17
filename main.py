@@ -523,7 +523,7 @@ async def on_message(message):
 
             all_rarities = sorted([r['rarity'] for r in top_1000.get('leaderboard', [])], reverse=True)
             if all_rarities:
-                better_count = sum(1 for r in all_rarities if r > rarity)
+                better_count = sum(1 for r in all_rarities if r >= rarity)
                 percentile = 100 * better_count / len(all_rarities)
                 percentile_display = round(percentile)
                 response_percentile = f"\n-# This roll is good for top {percentile_display}% (#{better_count + 1}) of 1000+ rarity rolls"
@@ -544,36 +544,3 @@ if not DISCORD_TOKEN:
 if __name__ == "__main__":
     keep_alive()
     client.run(DISCORD_TOKEN)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
