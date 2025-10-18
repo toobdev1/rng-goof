@@ -1,5 +1,5 @@
 {
-  "total_rolls": 2063,
+  "total_rolls": 2064,
   "leaderboard": [
     {
       "name": "\ud83c\udf0c \ud83c\udf20 <:easy:1399359028701692005> Celestial Starstruck Easy",
@@ -56,6 +56,15 @@
       "roll_number": 1299
     },
     {
+      "name": "\ud83e\uddca \ud83c\udf36\ufe0f <:hard:1399359024050212895> Frostbited Scorching Hard",
+      "rarity": 163840,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1760796246,
+      "roll_number": 2064
+    },
+    {
       "name": "\ud83c\udf40 \ud83c\udf19 \u2728 <:medium:1399359026558664744> Lucky Lunar Shiny Medium",
       "rarity": 153600,
       "user": "hexadec1m6l",
@@ -81,15 +90,6 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1759916820,
       "roll_number": 6
-    },
-    {
-      "name": "\u2699\ufe0f \ud83c\udf36\ufe0f <:difficult:1399359021114462211> Mechanical Scorching Difficult",
-      "rarity": 51200,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1760239014,
-      "roll_number": 1163
     }
   ]
 }
