@@ -1,5 +1,5 @@
 {
-  "total_rolls": 2197,
+  "total_rolls": 2198,
   "leaderboard": [
     {
       "name": "\ud83c\udf0c \ud83c\udf20 <:easy:1399359028701692005> Celestial Starstruck Easy",
@@ -27,6 +27,15 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1760004000,
       "roll_number": 322
+    },
+    {
+      "name": "\ud83e\uddca <:horrific:1399359003309637662> Frostbited Horrific",
+      "rarity": 524288,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1760885009,
+      "roll_number": 2198
     },
     {
       "name": "\ud83c\udf27\ufe0f \ud83d\udd29 \ud83c\udf19 <:medium:1399359026558664744> Rainy Metallic Lunar Medium",
@@ -81,15 +90,6 @@
       "server": "hanako testing server",
       "timestamp": 1760178475,
       "roll_number": 956
-    },
-    {
-      "name": "\ud83d\udcb0 <:hard:1399359024050212895> Lavish Hard",
-      "rarity": 62216,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1760884414,
-      "roll_number": 2111
     }
   ]
 }
