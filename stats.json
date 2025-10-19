@@ -1,5 +1,5 @@
 {
-  "total_rolls": 2110,
+  "total_rolls": 2111,
   "leaderboard": [
     {
       "name": "\ud83c\udf0c \ud83c\udf20 <:easy:1399359028701692005> Celestial Starstruck Easy",
@@ -83,13 +83,13 @@
       "roll_number": 956
     },
     {
-      "name": "\ud83c\udf27\u2699\ud83c\udf19 <:easy:1399359028701692005> Rainy Mechanical Lunar Easy",
-      "rarity": 61440,
+      "name": "\ud83d\udcb0 <:hard:1399359024050212895> Lavish Hard",
+      "rarity": 62216,
       "user": "hexadec1m6l",
       "user_id": 852902289270243388,
       "server": "Goof's Towers of Doom",
-      "timestamp": 1759916820,
-      "roll_number": 6
+      "timestamp": 1760884414,
+      "roll_number": 2111
     }
   ]
 }
