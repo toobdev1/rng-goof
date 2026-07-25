@@ -495,9 +495,10 @@ async def on_message(message):
         return
     cooldowns[message.author.id] = now
 
-    # Roll the item
-    name, rarity = roll_item_once()
     async with file_lock:
+        # Roll the item
+        name, rarity = roll_item_once()
+        
         stats = await load_stats()
         stats['total_rolls'] += 1
         roll_number = stats['total_rolls']
@@ -527,7 +528,6 @@ async def on_message(message):
                 percentile = 100 * better_count / len(all_rarities)
                 percentile_display = round(percentile)
                 response_percentile = f"\n-# This roll is good for top {percentile_display}% (#{better_count}) of 1000+ rarity rolls"
-
 
     display_name = f"**{name.upper()}**" if rarity >= 1000 else name
     response = f'-# RNG GOOF / <@{message.author.id}> / All-Time Roll #{roll_number:,}\n{display_name} (1 in {rarity:,})'
