@@ -1,5 +1,5 @@
 {
-  "total_rolls": 3024,
+  "total_rolls": 3025,
   "leaderboard": [
     {
       "name": "\ud83c\udf40 \u2753 \u26a1 <:hard:1399359024050212895> Lucky Mystery Godlike Hard",
@@ -65,6 +65,15 @@
       "roll_number": 2198
     },
     {
+      "name": "\ud83d\udd25 \ud83c\udf38 \ud83c\udf19 <:difficult:1399359021114462211> Hot Floral Lunar Difficult",
+      "rarity": 393216,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1785030261,
+      "roll_number": 3025
+    },
+    {
       "name": "\ud83c\udf27\ufe0f \ud83d\udd29 \ud83c\udf19 <:medium:1399359026558664744> Rainy Metallic Lunar Medium",
       "rarity": 294912,
       "user": "hexadec1m6l",
@@ -81,15 +90,6 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1760916505,
       "roll_number": 2333
-    },
-    {
-      "name": "\ud83c\udf27\ufe0f \u2699\ufe0f \ud83c\udf36\ufe0f <:medium:1399359026558664744> Rainy Mechanical Scorching Medium",
-      "rarity": 204800,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1760228040,
-      "roll_number": 1056
     }
   ]
 }
