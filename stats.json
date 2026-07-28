@@ -1,5 +1,5 @@
 {
-  "total_rolls": 3337,
+  "total_rolls": 3338,
   "leaderboard": [
     {
       "name": "\ud83c\udf40 \u2753 \u26a1 <:hard:1399359024050212895> Lucky Mystery Godlike Hard",
@@ -18,6 +18,15 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1785219136,
       "roll_number": 3246
+    },
+    {
+      "name": "\ud83d\udd25 \u2744\ufe0f \u2622\ufe0f <:medium:1399359026558664744> Hot Cold Radioactive Medium",
+      "rarity": 2328800,
+      "user": "caramelfenic",
+      "user_id": 786536500748746753,
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1785219646,
+      "roll_number": 3338
     },
     {
       "name": "\ud83c\udf0c \ud83c\udf20 <:easy:1399359028701692005> Celestial Starstruck Easy",
@@ -81,15 +90,6 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1760885009,
       "roll_number": 2198
-    },
-    {
-      "name": "\ud83d\udd25 \ud83c\udf38 \ud83c\udf19 <:difficult:1399359021114462211> Hot Floral Lunar Difficult",
-      "rarity": 393216,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1785030261,
-      "roll_number": 3025
     }
   ]
 }
