@@ -1,5 +1,5 @@
 {
-  "total_rolls": 3320,
+  "total_rolls": 3321,
   "leaderboard": [
     {
       "name": "\ud83c\udf40 \u2753 \u26a1 <:hard:1399359024050212895> Lucky Mystery Godlike Hard",
@@ -27,6 +27,15 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1760347270,
       "roll_number": 1555
+    },
+    {
+      "name": "\ud83c\udf19 \ud83e\uddca <:remorseless:1399359014587990110> Lunar Frostbited Remorseless",
+      "rarity": 1572864,
+      "user": "caramelfenic",
+      "user_id": 786536500748746753,
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1785219500,
+      "roll_number": 3321
     },
     {
       "name": "\ud83c\udf40 \ud83e\uddca \ud83c\udf0c <:hard:1399359024050212895> Lucky Frostbited Celestial Hard",
@@ -81,15 +90,6 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1785030261,
       "roll_number": 3025
-    },
-    {
-      "name": "\ud83c\udf27\ufe0f \ud83d\udd29 \ud83c\udf19 <:medium:1399359026558664744> Rainy Metallic Lunar Medium",
-      "rarity": 294912,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1760245798,
-      "roll_number": 1334
     }
   ]
 }
