@@ -1,5 +1,5 @@
 {
-  "total_rolls": 3474,
+  "total_rolls": 3475,
   "leaderboard": [
     {
       "name": "\ud83c\udf40 \u2753 \u26a1 <:hard:1399359024050212895> Lucky Mystery Godlike Hard",
@@ -47,6 +47,15 @@
       "roll_number": 3321
     },
     {
+      "name": "\ud83c\udf40 \ud83d\udd25 \u2699\ufe0f \ud83c\udf38 <:intense:1399359016613707777> Lucky Hot Mechanical Floral Intense",
+      "rarity": 1310720,
+      "user": "caramelfenic",
+      "user_id": 786536500748746753,
+      "server": "Goof's Towers of Doom",
+      "timestamp": 1785386776,
+      "roll_number": 3475
+    },
+    {
       "name": "\ud83c\udf40 \ud83e\uddca \ud83c\udf0c <:hard:1399359024050212895> Lucky Frostbited Celestial Hard",
       "rarity": 1048576,
       "user": "hexadec1m6l",
@@ -81,15 +90,6 @@
       "server": "Goof's Towers of Doom",
       "timestamp": 1760004000,
       "roll_number": 322
-    },
-    {
-      "name": "\ud83e\uddca <:horrific:1399359003309637662> Frostbited Horrific",
-      "rarity": 524288,
-      "user": "hexadec1m6l",
-      "user_id": 852902289270243388,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1760885009,
-      "roll_number": 2198
     }
   ]
 }
