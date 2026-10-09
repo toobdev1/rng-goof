@@ -1,6 +1,15 @@
 {
-  "total_rolls": 4904,
+  "total_rolls": 4905,
   "leaderboard": [
+    {
+      "name": "\ud83d\udd25 \u2744\ufe0f \u2b50 \u2728 <:difficult:1399359021114462211> Hot Cold Super Shiny Difficult",
+      "rarity": 20480000,
+      "user": "hexadec1m6l",
+      "user_id": 852902289270243388,
+      "server": "Silly Towers of Despair",
+      "timestamp": 1791520750,
+      "roll_number": 4905
+    },
     {
       "name": "\ud83c\udf40 \u2753 \u26a1 <:hard:1399359024050212895> Lucky Mystery Godlike Hard",
       "rarity": 6400000,
@@ -81,15 +90,6 @@
       "server": "hanako testing server",
       "timestamp": 1759918920,
       "roll_number": 49
-    },
-    {
-      "name": "\ud83d\udd25 \u2728 <:terrifying:1399359007352684596> Hot Shiny Terrifying",
-      "rarity": 819200,
-      "user": "caramelfenic",
-      "user_id": 786536500748746753,
-      "server": "Goof's Towers of Doom",
-      "timestamp": 1786019188,
-      "roll_number": 4513
     }
   ]
 }
